@@ -1,0 +1,77 @@
+[
+  {
+    "tcid": 1,
+    "hexCode": "#F09684",
+    "sortOrder": 1
+  },
+  {
+    "tcid": 2,
+    "hexCode": "#E5745E",
+    "sortOrder": 2
+  },
+  {
+    "tcid": 3,
+    "hexCode": "#F2A855",
+    "sortOrder": 4
+  },
+  {
+    "tcid": 4,
+    "hexCode": "#FFC759",
+    "sortOrder": 5
+  },
+  {
+    "tcid": 5,
+    "hexCode": "#FADF58",
+    "sortOrder": 6
+  },
+  {
+    "tcid": 6,
+    "hexCode": "#D5D95D",
+    "sortOrder": 7
+  },
+  {
+    "tcid": 7,
+    "hexCode": "#A7BF60",
+    "sortOrder": 8
+  },
+  {
+    "tcid": 8,
+    "hexCode": "#82D2D9",
+    "sortOrder": 10
+  },
+  {
+    "tcid": 9,
+    "hexCode": "#66BBCC",
+    "sortOrder": 11
+  },
+  {
+    "tcid": 10,
+    "hexCode": "#9A8DD9",
+    "sortOrder": 13
+  },
+  {
+    "tcid": 11,
+    "hexCode": "#D68751",
+    "sortOrder": 3
+  },
+  {
+    "tcid": 12,
+    "hexCode": "#6ED7A2",
+    "sortOrder": 9
+  },
+  {
+    "tcid": 13,
+    "hexCode": "#7490B8",
+    "sortOrder": 12
+  },
+  {
+    "tcid": 14,
+    "hexCode": "#D9A3B1",
+    "sortOrder": 14
+  },
+  {
+    "tcid": 15,
+    "hexCode": "#B38691",
+    "sortOrder": 15
+  }
+]

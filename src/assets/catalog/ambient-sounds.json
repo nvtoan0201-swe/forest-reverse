@@ -1,0 +1,167 @@
+[
+  {
+    "gid": 0,
+    "title": "Forest Rain",
+    "file": "ambient/0.wav"
+  },
+  {
+    "gid": 1,
+    "title": "Cafe in Paris",
+    "file": "ambient/1.wav"
+  },
+  {
+    "gid": 2,
+    "title": "Rain and Thunder",
+    "file": "ambient/2.wav"
+  },
+  {
+    "gid": 3,
+    "title": "City Square",
+    "file": "ambient/3.wav"
+  },
+  {
+    "gid": 4,
+    "title": "Night Forest",
+    "file": "ambient/4.wav"
+  },
+  {
+    "gid": 5,
+    "title": "Sandy Beach",
+    "file": "ambient/5.wav"
+  },
+  {
+    "gid": 6,
+    "title": "Lofi I",
+    "file": "ambient/6.wav"
+  },
+  {
+    "gid": 7,
+    "title": "Lofi II",
+    "file": "ambient/7.wav"
+  },
+  {
+    "gid": 8,
+    "title": "Lofi III",
+    "file": "ambient/8.wav"
+  },
+  {
+    "gid": 9,
+    "title": "Lofi IV",
+    "file": "ambient/9.wav"
+  },
+  {
+    "gid": 10,
+    "title": "Lofi V",
+    "file": "ambient/10.wav"
+  },
+  {
+    "gid": 11,
+    "title": "Lofi VI",
+    "file": "ambient/11.wav"
+  },
+  {
+    "gid": 12,
+    "title": "Lofi VII",
+    "file": "ambient/12.wav"
+  },
+  {
+    "gid": 13,
+    "title": "Lofi VIII",
+    "file": "ambient/13.wav"
+  },
+  {
+    "gid": 14,
+    "title": "Lofi IX",
+    "file": "ambient/14.wav"
+  },
+  {
+    "gid": 15,
+    "title": "Cozy Fireplace",
+    "file": "ambient/15.wav"
+  },
+  {
+    "gid": 16,
+    "title": "Waterfall (white)",
+    "file": "ambient/16.wav"
+  },
+  {
+    "gid": 17,
+    "title": "Waterfall (brown)",
+    "file": "ambient/17.wav"
+  },
+  {
+    "gid": 18,
+    "title": "Japanese Garden",
+    "file": "ambient/18.wav"
+  },
+  {
+    "gid": 19,
+    "title": "Waterfall (pink)",
+    "file": "ambient/19.wav"
+  },
+  {
+    "gid": 20,
+    "title": "Study Room",
+    "file": "ambient/20.wav"
+  },
+  {
+    "gid": 21,
+    "title": "Binaural Beats 8Hz",
+    "file": "ambient/21.wav"
+  },
+  {
+    "gid": 22,
+    "title": "Binaural Beats 16Hz",
+    "file": "ambient/22.wav"
+  },
+  {
+    "gid": 23,
+    "title": "Piano Heartstring",
+    "file": "ambient/23.wav"
+  },
+  {
+    "gid": 24,
+    "title": "Piano Book",
+    "file": "ambient/24.wav"
+  },
+  {
+    "gid": 25,
+    "title": "Piano Train",
+    "file": "ambient/25.wav"
+  },
+  {
+    "gid": 26,
+    "title": "Piano Rain",
+    "file": "ambient/26.wav"
+  },
+  {
+    "gid": 27,
+    "title": "Energy Drive",
+    "file": "ambient/27.wav"
+  },
+  {
+    "gid": 28,
+    "title": "Waking Groove",
+    "file": "ambient/28.wav"
+  },
+  {
+    "gid": 29,
+    "title": "Overdrive Flow",
+    "file": "ambient/29.wav"
+  },
+  {
+    "gid": 30,
+    "title": "After Snow",
+    "file": "ambient/30.wav"
+  },
+  {
+    "gid": 31,
+    "title": "Summer Shake",
+    "file": "ambient/31.wav"
+  },
+  {
+    "gid": 32,
+    "title": "Autumn Whisper",
+    "file": "ambient/32.wav"
+  }
+]

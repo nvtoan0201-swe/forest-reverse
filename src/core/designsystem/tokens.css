@@ -1,0 +1,265 @@
+/* Design tokens — ported values from the documented design system. */
+
+:root {
+  /* Palette: 12 stripes x 10 steps */
+  --accent-green-000: #fbfff2;
+  --accent-green-100: #c8ed82;
+  --accent-green-200: #a7db46;
+  --accent-green-300: #8dc925;
+  --accent-green-400: #77b612;
+  --accent-green-500: #64a408;
+  --accent-green-600: #529203;
+  --accent-green-700: #418000;
+  --accent-green-800: #336e00;
+  --accent-green-900: #265c00;
+
+  --accent-teal-000: #f3fffb;
+  --accent-teal-100: #c4f9e7;
+  --accent-teal-200: #94eacc;
+  --accent-teal-300: #67d0ac;
+  --accent-teal-400: #42ab88;
+  --accent-teal-500: #278063;
+  --accent-teal-600: #165943;
+  --accent-teal-700: #0c3c2e;
+  --accent-teal-800: #082c21;
+  --accent-teal-900: #06261d;
+
+  --accent-yellow-000: #fffdf4;
+  --accent-yellow-100: #fde282;
+  --accent-yellow-200: #f8d041;
+  --accent-yellow-300: #f1c21b;
+  --accent-yellow-400: #e7b405;
+  --accent-yellow-500: #daa700;
+  --accent-yellow-600: #c89800;
+  --accent-yellow-700: #b28600;
+  --accent-yellow-800: #987100;
+  --accent-yellow-900: #7d5c00;
+
+  --brown-000: #fff9f2;
+  --brown-100: #e7c7a7;
+  --brown-200: #cf9d68;
+  --brown-300: #b77b3a;
+  --brown-400: #9f611b;
+  --brown-500: #874e07;
+  --brown-600: #6f4000;
+  --brown-700: #563400;
+  --brown-800: #3e2800;
+  --brown-900: #261a00;
+
+  --citron-000: #fffff7;
+  --citron-100: #f8f9ce;
+  --citron-200: #e9e9a2;
+  --citron-300: #d0ce79;
+  --citron-400: #ada955;
+  --citron-500: #868239;
+  --citron-600: #635e25;
+  --citron-700: #494519;
+  --citron-800: #3a3512;
+  --citron-900: #332e0f;
+
+  --cyan-000: #f3feff;
+  --cyan-100: #b8f3f9;
+  --cyan-200: #7ddfeb;
+  --cyan-300: #4bc3d3;
+  --cyan-400: #269fb0;
+  --cyan-500: #0e7788;
+  --cyan-600: #035462;
+  --cyan-700: #003b48;
+  --cyan-800: #002d39;
+  --cyan-900: #002833;
+
+  --gray-000: #f9f9f9;
+  --gray-100: #f4f4f4;
+  --gray-200: #ececec;
+  --gray-300: #c9c9c9;
+  --gray-400: #a8a8a8;
+  --gray-500: #888888;
+  --gray-600: #666666;
+  --gray-700: #454545;
+  --gray-800: #373737;
+  --gray-900: #333333;
+
+  --green-000: #f6ffed;
+  --green-100: #e4face;
+  --green-200: #cceeac;
+  --green-300: #add886;
+  --green-400: #8aba5f;
+  --green-500: #65963e;
+  --green-600: #477624;
+  --green-700: #315f13;
+  --green-800: #225108;
+  --green-900: #194d00;
+
+  --orange-000: #fff7f3;
+  --orange-100: #fdcfba;
+  --orange-200: #f8a984;
+  --orange-300: #f28756;
+  --orange-400: #e86b32;
+  --orange-500: #db5417;
+  --orange-600: #c94206;
+  --orange-700: #b33700;
+  --orange-800: #9a2f00;
+  --orange-900: #802600;
+
+  --red-000: #fff4f4;
+  --red-100: #fdc0c0;
+  --red-200: #f88f8e;
+  --red-300: #f26663;
+  --red-400: #e84741;
+  --red-500: #db3328;
+  --red-600: #c92716;
+  --red-700: #b3200b;
+  --red-800: #9a1d04;
+  --red-900: #801b01;
+
+  --forest-teal-000: #eefff9;
+  --forest-teal-100: #c7e8dd;
+  --forest-teal-200: #9ccebd;
+  --forest-teal-300: #74b6a0;
+  --forest-teal-400: #51a387;
+  --forest-teal-500: #3e856c;
+  --forest-teal-600: #306e57;
+  --forest-teal-700: #275b47;
+  --forest-teal-800: #224c3b;
+  --forest-teal-900: #1f4032;
+
+  --yellow-000: #fffdf4;
+  --yellow-100: #fcf0be;
+  --yellow-200: #f6e085;
+  --yellow-300: #eece55;
+  --yellow-400: #e1bc30;
+  --yellow-500: #d0a715;
+  --yellow-600: #b98f03;
+  --yellow-700: #9d7701;
+  --yellow-800: #7c5c00;
+  --yellow-900: #594100;
+
+  /* Semantic */
+  --bg-primary: var(--gray-200);
+  --bg-secondary: var(--gray-100);
+  --bg-dialog: #ffffff;
+  --bg-under-forest: var(--forest-teal-800);
+  --bg-dark-green: #111d1a;
+  --brand: var(--forest-teal-400);
+  --brand-variant: var(--forest-teal-600);
+  --brand-nav: #264137;
+  --brand-topbar: #426d5f;
+  --brand-profile-bg: #183229;
+  --card-selected: #ffffff;
+  --card-unselected: var(--gray-200);
+  --ground-normal: var(--brown-500);
+  --ground-variant: var(--brown-600);
+  --highlight: var(--green-300);
+  --plantball: var(--citron-200);
+  --plantball-border: var(--citron-300);
+  --plantball-store: var(--yellow-100);
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-500);
+  --text-placeholder: var(--gray-300);
+  --text-error: var(--red-400);
+  --text-link: var(--forest-teal-400);
+  --text-status: var(--forest-teal-600);
+  --text-on-button: #ffffff;
+  --text-note: var(--citron-200);
+  --text-white-warm: #e3dac7;
+  --coin: #ffda01;
+  --coin-deep: #f2c00d;
+  --gem: #4ec5d3;
+  --divider: rgba(0, 0, 0, 0.05);
+  --dim: rgba(0, 0, 0, 0.6);
+  --success: #34c759;
+  --error: #ff3b30;
+  --warning: #ff9500;
+
+  /* Gradients */
+  --gradient-premium: linear-gradient(90deg, #51a387, #add886);
+  --gradient-discount: linear-gradient(90deg, #db5417, #e86b32);
+  --gradient-splash: linear-gradient(180deg, #67d0ac, #51a387);
+  --gradient-subscription: linear-gradient(135deg, #81d200 7%, #0ebc73 50%, #08c1f3 88%);
+
+  /* Radius / border / spacing */
+  --radius-xs: 2px;
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 10px;
+  --radius-button: 5px;
+  --radius-dialog: 5px;
+  --radius-full: 9999px;
+  --border-s: 0.5px;
+  --border-m: 1px;
+  --border-l: 2px;
+  --space-unit: 4px;
+  --dialog-width: 300px;
+  --menu-bar-height: 40px;
+  --menu-drawer-width: 190px;
+  --button-height: 40px;
+  --button-height-big: 50px;
+  --button-height-chip: 30px;
+
+  /* Typography */
+  --font-family: 'Source Sans Pro', 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-headline1: 600 36px/44px var(--font-family);
+  --text-headline2: 900 26px/36px var(--font-family);
+  --text-headline3: 700 24px/34px var(--font-family);
+  --text-headline4: 600 20px/28px var(--font-family);
+  --text-headline5: 600 18px/26px var(--font-family);
+  --text-subtitle1: 600 16px/22px var(--font-family);
+  --text-subtitle2: 600 14px/20px var(--font-family);
+  --text-body1: 400 16px/22px var(--font-family);
+  --text-body2: 400 14px/20px var(--font-family);
+  --text-caption1: 400 12px/16px var(--font-family);
+  --text-caption2: 400 10px/14px var(--font-family);
+  --text-button1: 600 20px/26px var(--font-family);
+  --text-button2: 400 16px/20px var(--font-family);
+  --text-button3: 400 14px/20px var(--font-family);
+  --text-button4: 700 14px/18px var(--font-family);
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-drop: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-dialog: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font: var(--text-body1);
+  color: var(--text-primary);
+  background: var(--gray-100);
+  overscroll-behavior: none;
+}
+
+#root {
+  min-height: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

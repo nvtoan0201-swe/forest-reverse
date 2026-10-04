@@ -1,0 +1,20 @@
+[
+  {
+    "gid": 1,
+    "skuId": "gems_60",
+    "amount": 60,
+    "isHot": 0
+  },
+  {
+    "gid": 2,
+    "skuId": "gems_200",
+    "amount": 200,
+    "isHot": 1
+  },
+  {
+    "gid": 3,
+    "skuId": "gems_600",
+    "amount": 600,
+    "isHot": 0
+  }
+]

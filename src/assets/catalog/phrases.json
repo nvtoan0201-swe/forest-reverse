@@ -1,0 +1,22 @@
+[
+  {
+    "phraseId": 1,
+    "phraseType": "growing",
+    "content": "Breathe in, breathe out. Your tree is growing."
+  },
+  {
+    "phraseId": 2,
+    "phraseType": "growing",
+    "content": "Stay a while. Focus is a habit."
+  },
+  {
+    "phraseId": 3,
+    "phraseType": "success",
+    "content": "A little patience grows a mighty tree."
+  },
+  {
+    "phraseId": 4,
+    "phraseType": "failure",
+    "content": "Every forest starts again tomorrow."
+  }
+]

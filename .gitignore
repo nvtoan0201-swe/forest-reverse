@@ -1,0 +1,22 @@
+node_modules
+dist
+dev-dist
+coverage
+playwright-report
+test-results
+.vite
+*.local
+.env
+.env.*
+!.env.example
+
+# --- Private / reverse-engineering docs (never published) ---
+docs/
+plans/
+
+# --- Original assets (copyright Seekrtech) — generated locally instead ---
+public/assets/**
+!public/assets/.gitkeep
+
+# generated catalogs may be regenerated from scripts; committed by default
+src/assets/catalog/*.tmp.json

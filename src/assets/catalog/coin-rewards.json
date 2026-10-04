@@ -1,0 +1,37 @@
+[
+  {
+    "gid": 1,
+    "title": "60 coin reward",
+    "amount": 60
+  },
+  {
+    "gid": 2,
+    "title": "100 coin reward",
+    "amount": 100
+  },
+  {
+    "gid": 3,
+    "title": "300 coin reward",
+    "amount": 300
+  },
+  {
+    "gid": 4,
+    "title": "500 coin reward",
+    "amount": 500
+  },
+  {
+    "gid": 5,
+    "title": "600 coin reward",
+    "amount": 600
+  },
+  {
+    "gid": 6,
+    "title": "1200 coin reward",
+    "amount": 1200
+  },
+  {
+    "gid": 7,
+    "title": "2000 coin reward",
+    "amount": 2000
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "gid": 1,
+    "title": "5 gems",
+    "amount": 5
+  },
+  {
+    "gid": 2,
+    "title": "10 gems",
+    "amount": 10
+  },
+  {
+    "gid": 3,
+    "title": "30 gems",
+    "amount": 30
+  },
+  {
+    "gid": 4,
+    "title": "60 gems",
+    "amount": 60
+  },
+  {
+    "gid": 5,
+    "title": "90 gems",
+    "amount": 90
+  },
+  {
+    "gid": 6,
+    "title": "200 gems",
+    "amount": 200
+  },
+  {
+    "gid": 7,
+    "title": "600 gems",
+    "amount": 600
+  }
+]

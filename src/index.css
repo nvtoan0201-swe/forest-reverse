@@ -1,0 +1,130 @@
+@import 'tailwindcss';
+@import './core/designsystem/tokens.css';
+
+@theme {
+  --color-brand: var(--brand);
+  --color-brand-variant: var(--brand-variant);
+  --color-brand-nav: var(--brand-nav);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-coin: var(--coin);
+  --color-gem: var(--gem);
+  --color-error: var(--error);
+  --font-sans: var(--font-family);
+}
+
+/* Shared utility classes bound to tokens (no hardcoded colors in components). */
+
+.text-headline3 {
+  font: var(--text-headline3);
+}
+.text-headline4 {
+  font: var(--text-headline4);
+}
+.text-headline5 {
+  font: var(--text-headline5);
+}
+.text-subtitle1 {
+  font: var(--text-subtitle1);
+}
+.text-subtitle2 {
+  font: var(--text-subtitle2);
+}
+.text-body1 {
+  font: var(--text-body1);
+}
+.text-body2 {
+  font: var(--text-body2);
+}
+.text-caption1 {
+  font: var(--text-caption1);
+}
+.text-caption2 {
+  font: var(--text-caption2);
+}
+.text-button1 {
+  font: var(--text-button1);
+}
+.text-button2 {
+  font: var(--text-button2);
+}
+.text-button3 {
+  font: var(--text-button3);
+}
+.text-button4 {
+  font: var(--text-button4);
+}
+
+.forest-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 3D press shadow for buttons */
+.fg-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-button);
+  font: var(--text-button2);
+  color: var(--text-on-button);
+  background: var(--fg-bg, var(--brand));
+  cursor: pointer;
+  transition:
+    transform 90ms ease,
+    filter 90ms ease;
+  user-select: none;
+}
+.fg-button::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto 0;
+  height: var(--fg-shadow, 4px);
+  border-radius: 0 0 var(--radius-button) var(--radius-button);
+  background: var(--fg-shadow-color, var(--brand-variant));
+  transition: height 90ms ease;
+}
+.fg-button:active:not(:disabled) {
+  transform: translateY(var(--fg-shadow, 4px));
+}
+.fg-button:active:not(:disabled)::after {
+  height: calc(var(--fg-shadow, 4px) / 3);
+}
+.fg-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--gray-300);
+}
+
+.scroll-area {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-area::-webkit-scrollbar {
+  width: 3px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 9999px;
+}
