@@ -165,6 +165,25 @@ async function extractPlaceholder() {
   }
   write('trees/placeholder.svg', treeSvg(-1, 2, 3));
 
+  // Placeholder stand-in for the original plant_ball.webp (citron disc + bowl).
+  write(
+    'ui/plant_ball.svg',
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="50" fill="#E9E9A2"/>
+<path d="M12 56 a38 26 0 0 0 76 0 z" fill="#6F4000"/>
+<ellipse cx="50" cy="56" rx="38" ry="9" fill="#874E07"/>
+</svg>
+`,
+  );
+  write(
+    'ui/ground_piece_xmas.svg',
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><ellipse cx="50" cy="20" rx="48" ry="16" fill="#ffffff" opacity="0.85"/></svg>\n`,
+  );
+  write(
+    'ui/web_logo.svg',
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" role="img"><text x="0" y="22" font-family="sans-serif" font-size="18" font-weight="700" fill="#ffffff">Focus Grove</text></svg>\n`,
+  );
+
   for (const s of sounds) write(`sounds/ambient/${s.gid}.wav`, ambientWav(s.gid));
   write('sounds/sfx/click.wav', sfxWav('click'));
   write('sounds/sfx/slide.wav', sfxWav('slide'));
@@ -550,6 +569,7 @@ const UI_SEMANTICS = new Set([
   'hazeNoise',
   'fakeBackground',
   'emptyForest',
+  'webLogo',
 ]);
 
 function extractIconsAndUi() {

@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { toPng } from 'html-to-image';
-import { Button, IconButton } from '../../../core/designsystem/components/Button';
+import { Button } from '../../../core/designsystem/components/Button';
+import { MainTopBar } from '../../../core/designsystem/components/MainTopBar';
 import { Dialog } from '../../../core/designsystem/components/Dialog';
 import { Icon } from '../../../core/designsystem/icons/Icon';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
 import { useSessionStore } from '../../../core/session/sessionStore';
+import { useWallet } from '../../plant/application/hooks';
 import { usePref } from '../../../core/prefs/usePref';
 import { UDKeys } from '../../../core/prefs/UDKeys';
 import { dayKey, formatMinutes } from '../../../core/lib/format';
@@ -34,7 +36,8 @@ export function ResultView() {
   const { t } = useTranslation();
   const repos = useRepos();
   const navigate = useNavigate();
-  const { result, resetForm } = useSessionStore();
+  const wallet = useWallet();
+  const { result, resetForm, focusMode } = useSessionStore();
   const [coinOpen, setCoinOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [reasonOpen, setReasonOpen] = useState(false);
@@ -95,80 +98,94 @@ export function ResultView() {
 
   return (
     <div className="relative flex h-full flex-col" style={{ background: 'var(--brand)' }}>
-      <header className="safe-top">
-        <div className="flex h-[40px] items-center gap-2 px-2">
-          <IconButton label={t('common.back')} onClick={resetForm} className="text-white">
-            <Icon name="back" size={22} />
-          </IconButton>
-          <div className="flex-1" />
-          <span className="text-subtitle1 text-white">
-            {success ? t('result.treesPlanted') : t('timeline.dead')}
-          </span>
-          <div className="flex-1" />
-          {success && <span className="text-subtitle1 text-[var(--coin)]">+{coins}</span>}
-        </div>
-      </header>
+      <MainTopBar
+        leading="back"
+        onLeading={resetForm}
+        countMode={plant.mode === 'countup' ? 'UP' : 'DOWN'}
+        focusMode={focusMode}
+        onModeClick={resetForm}
+        coin={wallet.coin}
+        onAddCoin={() => undefined}
+      />
 
-      <div className="scroll-area flex-1 overflow-y-auto px-5 pb-6 pt-2">
-        <div ref={cardRef} className="rounded-[var(--radius-l)] p-4" style={{ background: 'var(--brand)' }}>
+      <div className="scroll-area flex-1 overflow-y-auto pb-6 pt-1">
+        <div ref={cardRef} style={{ background: 'var(--brand)' }}>
+          <h1
+            className="text-center text-headline4 text-white"
+            style={{ paddingLeft: 'var(--result-top-pad-h)', paddingRight: 'var(--result-top-pad-h)' }}
+          >
+            {success ? t('result.success', { count: alive }) : t('result.failReason', { reason: failReason })}
+          </h1>
+
           <motion.div
-            initial={success ? { opacity: 0, y: 8 } : { opacity: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-4 gap-2"
+            className="mt-4 flex flex-wrap items-end justify-center gap-x-1 gap-y-2 px-4"
+            animate={success ? undefined : { x: [0, -6, 6, -4, 4, 0] }}
+            transition={success ? undefined : { duration: 0.3 }}
           >
             {trees.map((tree, index) => (
               <motion.img
                 key={tree.id ?? index}
-                initial={{ scale: 0.7, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.08, type: 'spring', stiffness: 320, damping: 22 }}
+                initial={{ opacity: 0, scaleX: 0.4, scaleY: 0 }}
+                animate={{ opacity: 1, scaleX: 1, scaleY: 1 }}
+                transition={{ delay: index * 0.08, duration: 0.25 }}
                 src={
                   tree.isDead
                     ? repos.treeAssets.deadUrl(tree.treeType)
                     : repos.treeAssets.phaseUrl(tree.treeType, tree.phase)
                 }
                 alt=""
-                className={`h-20 w-full object-contain ${tree.isDead ? 'grayscale' : ''}`}
-                style={{ opacity: tree.isDead ? 0.85 : 1 }}
+                className={`h-24 w-16 object-contain ${tree.isDead ? 'grayscale' : ''}`}
+                style={{ opacity: tree.isDead ? 0.85 : 1, transformOrigin: '50% 100%' }}
               />
             ))}
           </motion.div>
-          <h1 className="mt-3 text-center text-headline4 text-white">
-            {success ? t('result.success', { count: alive }) : t('result.failReason', { reason: failReason })}
-          </h1>
-          <p className="mt-2 text-center text-body2 text-white/80">
+
+          <p className="mt-3 text-center text-body2 text-white/80">
             {t('result.focusTime')}: {formatMinutes(elapsedMs / 1000)}
             {gems > 0 ? ` · +${gems} ♦` : ''}
           </p>
+
+          {!success && (
+            <button
+              onClick={() => setReasonOpen(true)}
+              className="mx-auto mt-4 block rounded-[var(--radius-s)] px-4 py-2 text-body2 text-white underline"
+            >
+              {t('result.checkReason')}
+            </button>
+          )}
         </div>
 
-        {!success && (
+        <div className="mt-10 flex items-center justify-center" style={{ gap: 'var(--result-action-gap)' }}>
           <button
-            onClick={() => setReasonOpen(true)}
-            className="mx-auto mt-4 block text-body2 text-white underline"
+            onClick={() => setNoteOpen(true)}
+            aria-label={t('result.note')}
+            className="flex items-center justify-center rounded-full"
+            style={{
+              width: 'var(--result-action-size)',
+              height: 'var(--result-action-size)',
+              border: '1px solid rgba(255,255,255,0.9)',
+              color: 'var(--color-white)',
+            }}
           >
-            {t('result.checkReason')}
+            <Icon name="note" size={20} />
           </button>
-        )}
-
-        <div className="mt-8 flex items-end justify-center gap-6">
-          <button onClick={() => setNoteOpen(true)} className="flex flex-col items-center gap-1 text-white">
-            <Icon name="note" size={26} />
-            <span className="text-caption1">{t('result.note')}</span>
-          </button>
-          <button onClick={() => navigate('/relax')} className="flex flex-col items-center gap-1 text-white">
-            <Icon name="relax" size={26} />
-            <span className="text-caption1">{t('result.relax')}</span>
-          </button>
-          <button onClick={() => void share()} className="flex flex-col items-center gap-1 text-white">
-            <Icon name="share" size={26} />
-            <span className="text-caption1">{t('result.share')}</span>
+          <button
+            onClick={() => void share()}
+            aria-label={t('result.share')}
+            className="flex items-center justify-center"
+            style={{ width: 'var(--result-action-size)', height: 'var(--result-action-size)' }}
+          >
+            <Icon name="share" size={40} />
           </button>
         </div>
 
         <div className="mt-8 flex justify-center">
-          <Button variant="accentTeal" long onClick={resetForm}>
-            {t('common.done')}
+          <Button
+            size="big"
+            style={{ width: 'var(--result-relax-width)', height: 'var(--result-relax-height)' }}
+            onClick={() => navigate('/relax')}
+          >
+            {t('result.relax')}
           </Button>
         </div>
       </div>
@@ -197,13 +214,8 @@ export function ResultView() {
         }
       >
         <div className="flex flex-col items-center gap-2">
-          <span
-            className="flex h-16 w-16 items-center justify-center rounded-full text-headline3"
-            style={{ background: 'var(--coin)', color: 'var(--brown-700)' }}
-          >
-            ¢
-          </span>
-          <p className="text-headline2">{success ? displayedCoins : 0}</p>
+          <Icon name="coin" size={64} />
+          <p className="text-numbers text-headline2">{success ? displayedCoins : 0}</p>
           {boostAvailable ? (
             <p className="text-caption1">{t('result.boost')}</p>
           ) : success ? (

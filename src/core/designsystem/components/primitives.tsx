@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { motion } from 'framer-motion';
+import { Icon } from '../icons/Icon';
 
 export function Card({ className = '', children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
@@ -46,13 +47,13 @@ export function TagChip({
   return (
     <button
       onClick={onClick}
-      className={`inline-flex max-w-[220px] items-center gap-2 rounded-full px-3 py-1.5 text-headline5 ${
+      className={`inline-flex max-w-[220px] items-center gap-2 rounded-full px-3 py-[6px] text-headline5 ${
         light ? 'bg-white/10 text-white' : 'bg-[var(--bg-secondary)]'
       }`}
     >
-      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color ?? 'var(--gray-400)' }} />
+      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: color ?? 'var(--yellow-50)' }} />
       <span className="truncate">{name}</span>
-      {editable && <span className="text-xs opacity-50">✎</span>}
+      {editable && <Icon name="tagExpand" size={16} className="opacity-50" />}
     </button>
   );
 }
@@ -191,26 +192,25 @@ export function CoinChip({
   return (
     <div className="flex items-center gap-2">
       <div
-        className="flex items-center gap-1.5 rounded-full"
+        className="flex h-[30px] items-center rounded-full"
         style={{ background: 'var(--forest-teal-500)' }}
       >
-        <div className="flex items-center gap-1 px-2 py-0.5">
-          <span
-            className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-black"
-            style={{ background: 'var(--coin)', color: 'var(--brown-700)' }}
-          >
-            ¢
+        <span className="flex h-[34px] w-[34px] items-center justify-center">
+          <Icon name="coin" size={34} />
+        </span>
+        {!compact && (
+          <span className="text-numbers min-w-[20px] pr-1 text-center text-[14px] leading-none text-white">
+            {coin.toLocaleString()}
           </span>
-          {!compact && <span className="text-subtitle2 text-white">{coin.toLocaleString()}</span>}
-        </div>
+        )}
         {onAdd && (
           <button
             aria-label="Add coins"
             onClick={onAdd}
-            className="mr-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-[12px] font-bold"
-            style={{ background: 'var(--coin)', color: 'var(--brown-800)' }}
+            className="mr-[3px] flex h-4 w-4 items-center justify-center rounded-full"
+            style={{ background: 'var(--coin)' }}
           >
-            +
+            <Icon name="plus" size={12} className="text-[var(--brown-700)]" />
           </button>
         )}
       </div>

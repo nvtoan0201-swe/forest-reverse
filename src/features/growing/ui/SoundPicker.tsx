@@ -3,6 +3,7 @@ import { Sheet } from '../../../core/designsystem/components/Sheet';
 import { Button } from '../../../core/designsystem/components/Button';
 import { Icon } from '../../../core/designsystem/icons/Icon';
 import { getAudio } from '../../../core/audio/AudioManager';
+import { soundCoverFor } from '../../../core/designsystem/assets';
 import { usePref } from '../../../core/prefs/usePref';
 import { UDKeys } from '../../../core/prefs/UDKeys';
 import { useUnlockedSounds } from '../../plant/application/hooks';
@@ -34,6 +35,7 @@ export function SoundPicker({ open, onClose }: { open: boolean; onClose: () => v
         {sounds.map((sound) => {
           const isUnlocked = unlocked.includes(sound.gid);
           const selected = selectedGid === sound.gid;
+          const cover = soundCoverFor(sound.gid);
           return (
             <li key={sound.gid}>
               <button
@@ -41,18 +43,27 @@ export function SoundPicker({ open, onClose }: { open: boolean; onClose: () => v
                 onClick={() => {
                   setSelectedGid(sound.gid);
                   audio.playBgm(sound.gid);
+                  onClose();
                 }}
-                className={`flex w-full items-center gap-3 rounded-[var(--radius-m)] p-3 text-left ${
+                className={`flex w-full items-center gap-3 rounded-[var(--radius-m)] p-2 text-left ${
                   isUnlocked ? '' : 'opacity-50'
                 }`}
                 style={{ background: selected ? 'var(--bg-secondary)' : 'transparent' }}
               >
-                <span
-                  className="flex h-9 w-9 items-center justify-center rounded-full"
-                  style={{ background: 'var(--forest-teal-100)' }}
-                >
-                  <Icon name="sound" size={18} className="text-[var(--brand-variant)]" />
-                </span>
+                {cover ? (
+                  <img
+                    src={cover}
+                    alt=""
+                    className="h-11 w-11 shrink-0 rounded-[var(--radius-m)] object-cover"
+                  />
+                ) : (
+                  <span
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: 'var(--forest-teal-100)' }}
+                  >
+                    <Icon name="sound" size={18} className="text-[var(--brand-variant)]" />
+                  </span>
+                )}
                 <span className="flex-1 text-subtitle2">{sound.title}</span>
                 {!isUnlocked && <Icon name="lock" size={14} className="text-[var(--text-tertiary)]" />}
                 {selected && <Icon name="check" size={18} className="text-[var(--brand)]" />}

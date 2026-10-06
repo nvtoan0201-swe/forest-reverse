@@ -397,5 +397,12 @@
     "resource": "failure_reason_btn",
     "file": "failure_reason_btn.webp",
     "density": "mdpi"
+  },
+  "webLogo": {
+    "field": "U4",
+    "id": "0x7f0811f5",
+    "resource": "web_logo",
+    "file": "web_logo.webp",
+    "density": "xxhdpi"
   }
 }

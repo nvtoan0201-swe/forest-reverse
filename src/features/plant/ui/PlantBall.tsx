@@ -1,12 +1,19 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Icon } from '../../../core/designsystem/icons/Icon';
+import { motion } from 'framer-motion';
 import { getAudio } from '../../../core/audio/AudioManager';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
+import { plantBallUrl } from '../../../core/designsystem/assets';
+import { MOTION, anticipateOvershoot } from '../../../core/designsystem/motion';
 import { PLANT_MINUTE_STEPS } from '../domain/constants';
 
-const SIZE = 300;
+/**
+ * PlantBall — original ground art (plant_ball.webp) + phase-6 tree preview +
+ * 270° drag ring. Geometry in a 100x100 viewBox; ring sits just inside the
+ * citron disc with citron300 track and citron200 progress (docs/07 §2.3).
+ */
+const SIZE = 100;
 const CENTER = SIZE / 2;
-const RADIUS = 138;
+const RADIUS = 46;
 const START_ANGLE = 135; // bottom-left
 const SWEEP = 270; // clockwise to bottom-right
 const MIN_MINUTES = 5;
@@ -16,7 +23,7 @@ function pointAt(angleDeg: number, radius = RADIUS) {
   return { x: CENTER + radius * Math.cos(rad), y: CENTER + radius * Math.sin(rad) };
 }
 
-function polar(angleDeg: number) {
+function arcPath(angleDeg: number) {
   const startRad = (START_ANGLE * Math.PI) / 180;
   const endRad = (angleDeg * Math.PI) / 180;
   const x0 = CENTER + RADIUS * Math.cos(startRad);
@@ -53,9 +60,9 @@ export function PlantBall({
     [minutes, maxMinutes],
   );
   const angle = START_ANGLE + SWEEP * Math.min(1, Math.max(0, progress));
-  const arc = useMemo(() => polar(angle), [angle]);
+  const arc = useMemo(() => arcPath(angle), [angle]);
   const thumb = pointAt(angle);
-  const treeUrl = repos.treeAssets.phaseUrl(speciesId, 1);
+  const treeUrl = repos.treeAssets.phaseUrl(speciesId, 5);
 
   const minutesFromEvent = useCallback(
     (clientX: number, clientY: number) => {
@@ -68,7 +75,6 @@ export function PlantBall({
       deg = (deg + 360) % 360;
       let delta = (deg - START_ANGLE + 360) % 360;
       if (delta > SWEEP) {
-        // outside the active sweep: clamp to the nearest end
         delta = delta > SWEEP + (360 - SWEEP) / 2 ? 0 : SWEEP;
       }
       const t = delta / SWEEP;
@@ -117,11 +123,47 @@ export function PlantBall({
   );
 
   return (
-    <div className="relative select-none" style={{ width: '100%', maxWidth: 320 }}>
+    <div className="relative w-full select-none" style={{ aspectRatio: '1 / 1', maxWidth: 320 }}>
+      <img
+        src={plantBallUrl()}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+      />
+
+      {/* Tree preview, phase 6, bottom-anchored in the bowl. */}
+      <motion.div
+        key={speciesId}
+        className="pointer-events-none absolute left-1/2"
+        style={{ bottom: '22%', width: '62%', transformOrigin: '50% 100%' }}
+        initial={{ x: '-50%', scaleX: 0.4, scaleY: 0 }}
+        animate={{ x: '-50%', scaleX: 1, scaleY: 1 }}
+        transition={{ duration: MOTION.treeIconPop.duration / 1000, ease: anticipateOvershoot }}
+      >
+        <img
+          src={treeUrl}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="h-auto w-full"
+          onError={(e) => {
+            const img = e.currentTarget;
+            const fallback = repos.treeAssets.fallbackUrl(speciesId, 'phase_6');
+            if (fallback && !img.dataset.fallback) {
+              img.dataset.fallback = '1';
+              img.src = fallback;
+            } else {
+              img.src = repos.treeAssets.placeholderUrl();
+            }
+          }}
+        />
+      </motion.div>
+
       <svg
         ref={svgRef}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="w-full touch-none"
+        className="absolute inset-0 h-full w-full touch-none"
         role="slider"
         aria-label="Plant duration"
         aria-valuemin={MIN_MINUTES}
@@ -153,34 +195,12 @@ export function PlantBall({
           }
         }}
       >
-        <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="var(--plantball)" strokeWidth={14} opacity={0.45} />
-        <path d={arc} fill="none" stroke="var(--plantball)" strokeWidth={14} strokeLinecap="round" />
-        <circle
-          cx={CENTER}
-          cy={CENTER}
-          r={RADIUS - 34}
-          fill="var(--forest-teal-400)"
-          stroke="rgba(255,255,255,0.25)"
-          strokeWidth={1}
-        />
-        <image
-          href={treeUrl}
-          x={CENTER - 100}
-          y={CENTER - 92}
-          width={200}
-          height={200}
-          preserveAspectRatio="xMidYMax meet"
-          onError={(e) => {
-            (e.currentTarget as SVGImageElement).setAttribute('href', repos.treeAssets.placeholderUrl());
-          }}
-        />
+        <circle cx={CENTER} cy={CENTER} r={RADIUS} fill="none" stroke="var(--plantball-border)" strokeWidth={7} />
+        <path d={arc} fill="none" stroke="var(--plantball)" strokeWidth={7} strokeLinecap="round" />
         {dragging && (
-          <circle cx={thumb.x} cy={thumb.y} r={11} fill="#fff" stroke="var(--plantball-border)" strokeWidth={3} />
+          <circle cx={thumb.x} cy={thumb.y} r={5.5} fill="#ffffff" stroke="var(--plantball-border)" strokeWidth={2} />
         )}
       </svg>
-      <div className="pointer-events-none absolute inset-x-0 top-[54%] flex flex-col items-center">
-        <Icon name="chevronDown" size={14} className="text-white/70" />
-      </div>
     </div>
   );
 }

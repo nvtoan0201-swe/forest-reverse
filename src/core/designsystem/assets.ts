@@ -47,8 +47,55 @@ export function uiUrl(file: string): string {
   return assetUrl(`ui/${file}`);
 }
 
+/** Ground/base artwork of the PlantBall (original webp vs placeholder svg). */
+export function plantBallUrl(): string {
+  return uiUrl(isOriginalMode ? 'plant_ball.webp' : 'plant_ball.svg');
+}
+
+export function groundPieceXmasUrl(): string {
+  return uiUrl(isOriginalMode ? 'ground_piece_xmas.webp' : 'ground_piece_xmas.svg');
+}
+
+export function drawerLogoUrl(): string {
+  return uiUrl(isOriginalMode ? 'web_logo.webp' : 'web_logo.svg');
+}
+
 export function soundCoverUrl(file: string): string {
   return assetUrl(`ui/sounds/${file}`);
+}
+
+/** Verified gid -> cover art mapping (drawable-xxhdpi sound_*.webp). */
+const SOUND_COVERS: Record<number, string> = {
+  0: 'sound_forest_rain.webp',
+  1: 'sound_paris_cafe.webp',
+  2: 'sound_thunder.webp',
+  3: 'sound_time_square.webp',
+  4: 'sound_night_forest.webp',
+  5: 'sound_sandy_beach.webp',
+  6: 'sound_lofi_i_6.webp',
+  7: 'sound_lofi_i_7.webp',
+  8: 'sound_lofi_i_8.webp',
+  9: 'sound_lofi_ii_9.webp',
+  10: 'sound_lofi_ii_10.webp',
+  11: 'sound_lofi_ii_11.webp',
+  12: 'sound_lofi_iii_12.webp',
+  13: 'sound_lofi_iii_13.webp',
+  14: 'sound_lofi_iii_14.webp',
+  15: 'sound_crackling_fire.webp',
+  16: 'sound_waterfall_white.webp',
+  17: 'sound_waterfall_brown.webp',
+  18: 'sound_japanese_garden.webp',
+  19: 'sound_waterfall_pink.webp',
+  20: 'ambient_sound_20.webp',
+  21: 'sound_binaural_beats_8hz.webp',
+  22: 'sound_binaural_beats_16hz.webp',
+};
+
+/** Cover art for an ambient sound gid (original mode only). */
+export function soundCoverFor(gid: number): string | null {
+  if (!isOriginalMode) return null;
+  const file = SOUND_COVERS[gid];
+  return file ? soundCoverUrl(file) : null;
 }
 
 export function landingUrl(): string {

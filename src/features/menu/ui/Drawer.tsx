@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Icon, type IconName } from '../../../core/designsystem/icons/Icon';
+import { drawerLogoUrl } from '../../../core/designsystem/assets';
 
 interface DrawerItem {
   key: string;
@@ -10,6 +11,10 @@ interface DrawerItem {
   enabled: boolean;
 }
 
+/**
+ * Side menu — 190dp, background colorLightGreen #51A387 (plans/05.03 §11).
+ * Item height 30dp: spacer 25 / icon 24 / gap 20 / text 11sp bold white.
+ */
 export function Drawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,7 +48,7 @@ export function Drawer({ open, onClose }: { open: boolean; onClose: () => void }
           />
           <motion.aside
             className="absolute inset-y-0 left-0 z-30 flex flex-col"
-            style={{ width: 'var(--menu-drawer-width)', background: 'var(--brand-nav)' }}
+            style={{ width: 'var(--menu-drawer-width)', background: 'var(--color-light-green)' }}
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
@@ -51,11 +56,7 @@ export function Drawer({ open, onClose }: { open: boolean; onClose: () => void }
             aria-label="Menu"
           >
             <div className="safe-top" />
-            <div className="px-4 py-5">
-              <img src="icons/icon.svg" alt="" width={44} height={44} />
-              <p className="mt-2 text-subtitle1 text-[var(--text-white-warm)]">Focus Grove</p>
-            </div>
-            <nav className="scroll-area flex-1 overflow-y-auto pb-6">
+            <nav className="scroll-area flex-1 overflow-y-auto pt-5">
               {items.map((item) => (
                 <button
                   key={item.key}
@@ -63,15 +64,21 @@ export function Drawer({ open, onClose }: { open: boolean; onClose: () => void }
                     navigate(item.route);
                     onClose();
                   }}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-left"
-                  style={{ color: 'var(--text-white-warm)' }}
+                  className="flex w-full items-center text-left"
+                  style={{ height: 30, paddingLeft: 25, gap: 20, color: 'var(--color-white)' }}
                 >
-                  <Icon name={item.icon} size={22} />
-                  <span className="flex-1 text-headline5">{t(`nav.${item.key}`)}</span>
+                  <span className="flex w-6 shrink-0 items-center justify-center">
+                    <Icon name={item.icon} size={24} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-[11px] font-bold leading-none">
+                    {t(`nav.${item.key}`)}
+                  </span>
                   {!item.enabled && (
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-caption2">
-                      {t('common.comingSoon')}
-                    </span>
+                    <span
+                      className="mr-2 h-1 w-1 shrink-0 rounded-full"
+                      style={{ background: 'var(--red-500)' }}
+                      aria-label={t('common.comingSoon')}
+                    />
                   )}
                 </button>
               ))}
@@ -81,9 +88,10 @@ export function Drawer({ open, onClose }: { open: boolean; onClose: () => void }
                 navigate('/about');
                 onClose();
               }}
-              className="px-4 pb-8 text-left text-caption1 text-white/60"
+              className="flex flex-col items-start gap-2 px-5 pb-8 pt-4 text-left"
             >
-              {t('nav.about')} · v0.1.0
+              <img src={drawerLogoUrl()} alt="Focus Grove" className="h-auto w-[120px]" draggable={false} />
+              <span className="text-caption2 text-white/60">{t('nav.about')} · v0.1.0</span>
             </button>
           </motion.aside>
         </>

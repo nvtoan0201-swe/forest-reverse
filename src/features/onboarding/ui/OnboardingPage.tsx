@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
@@ -8,6 +8,8 @@ import { Dialog } from '../../../core/designsystem/components/Dialog';
 import { usePref } from '../../../core/prefs/usePref';
 import { UDKeys } from '../../../core/prefs/UDKeys';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
+import { isOriginalMode, landingUrl, uiUrl } from '../../../core/designsystem/assets';
+import { MOTION } from '../../../core/designsystem/motion';
 
 function ForestArt() {
   const repos = useRepos();
@@ -27,6 +29,50 @@ function ForestArt() {
   );
 }
 
+const WALKTHROUGH_ART = ['walkthrough_1.webp', 'walkthrough_2.webp', 'walkthrough_3.webp', 'walkthrough_3.webp', 'walkthrough_3.webp', 'walkthrough_3.webp'];
+
+/**
+ * Landing in original mode is served verbatim from the bundled webview
+ * (res/raw/landing_html.html) and bridged with postMessage (P-210).
+ */
+function OriginalLanding({ onStart }: { onStart: () => void }) {
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const type = (event.data as { type?: string } | null)?.type;
+      if (type === 'start_walkthrough' || type === 'start_auth') onStart();
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [onStart]);
+
+  // The bundled webview reports its CTA clicks with window.postMessage, which
+  // stays inside the frame; forward them to the React parent (same origin).
+  const bridge = (event: SyntheticEvent<HTMLIFrameElement>) => {
+    const win = event.currentTarget.contentWindow as (Window & { __fgBridged?: boolean }) | null;
+    if (!win || win.__fgBridged) return;
+    win.__fgBridged = true;
+    const original = win.postMessage.bind(win);
+    win.postMessage = ((message: unknown, targetOrigin?: string, transfer?: Transferable[]) => {
+      try {
+        window.postMessage(message, '*');
+      } catch {
+        /* ignore */
+      }
+      return original(message as never, (targetOrigin ?? '*') as never, transfer as never);
+    }) as typeof win.postMessage;
+  };
+
+  return (
+    <iframe
+      src={`${landingUrl()}#language=en`}
+      title="Plant your Forest"
+      className="h-full w-full border-0"
+      sandbox="allow-scripts allow-same-origin"
+      onLoad={bridge}
+    />
+  );
+}
+
 export function OnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -38,6 +84,10 @@ export function OnboardingPage() {
     setFinished(true);
     navigate('/main', { replace: true });
   };
+
+  if (step === 'landing' && isOriginalMode) {
+    return <OriginalLanding onStart={() => setStep(0)} />;
+  }
 
   if (step === 'landing') {
     return (
@@ -100,24 +150,58 @@ export function OnboardingPage() {
   ];
   const page = pages[step] ?? pages[0]!;
   const next = () => (step >= pages.length - 1 ? finish() : setStep(step + 1));
+  const dark = isOriginalMode && step >= 3;
+  const last = step >= pages.length - 1;
 
   return (
-    <div className="safe-top safe-bottom flex h-full flex-col bg-white">
-      <div className="flex items-center gap-3 px-4 pt-3">
+    <div
+      className="safe-top safe-bottom relative flex h-full flex-col overflow-hidden"
+      style={
+        dark
+          ? {
+              backgroundImage: `url(${uiUrl('walkthrough_bg_1.webp')})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }
+          : { background: '#ffffff' }
+      }
+    >
+      <div className="relative z-10 flex items-center gap-3" style={{ padding: '12px 16px 0' }}>
         <button
           onClick={() => (step === 0 ? setStep('landing') : setStep(step - 1))}
           aria-label={t('common.back')}
-          className="flex h-10 w-10 items-center justify-center rounded-[4px] shadow"
-          style={{ color: 'var(--forest-teal-600)' }}
+          className="flex shrink-0 items-center justify-center"
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 4,
+            background: dark ? 'rgba(255,255,255,0.9)' : '#e9e9e9',
+            color: 'var(--forest-teal-600)',
+          }}
         >
-          <Icon name="back" size={20} />
+          <Icon name="back" size={22} />
         </button>
-        <div className="flex flex-1 gap-2" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={6}>
+        <div
+          className="flex flex-1"
+          style={{ gap: 8 }}
+          role="progressbar"
+          aria-valuenow={step + 1}
+          aria-valuemin={1}
+          aria-valuemax={6}
+        >
           {pages.map((_, i) => (
             <span
               key={i}
-              className="h-1.5 flex-1 rounded-full"
-              style={{ background: i <= step ? 'var(--forest-teal-600)' : 'var(--gray-300)' }}
+              className="flex-1 rounded-[3px]"
+              style={{
+                height: 6,
+                background:
+                  i === step
+                    ? 'var(--forest-teal-600)'
+                    : dark
+                      ? 'rgba(255,255,255,0.4)'
+                      : 'var(--gray-300)',
+              }}
             />
           ))}
         </div>
@@ -133,27 +217,56 @@ export function OnboardingPage() {
         }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-1 cursor-grab flex-col items-center justify-center px-8 text-center"
+        transition={{ duration: MOTION.treeCrossFade.duration / 1000 }}
+        className="relative z-10 flex flex-1 cursor-grab flex-col items-center px-8 pt-8 text-center"
       >
-        <h2 className="text-headline3">{page.title}</h2>
-        <p className="mt-2 text-body1 text-[var(--text-secondary)]">{page.text}</p>
-        <div className="mt-8 h-32">
-          <ForestArt />
-        </div>
+        <h2
+          className="text-headline3"
+          style={{
+            color: isOriginalMode ? '#ffffff' : 'var(--text-primary)',
+            textShadow: isOriginalMode ? '0 0 18px rgba(173,216,134,0.9), 0 0 6px rgba(103,208,172,0.7)' : 'none',
+          }}
+        >
+          {page.title}
+        </h2>
+        {!isOriginalMode && <p className="mt-2 text-body1 text-[var(--text-secondary)]">{page.text}</p>}
+        {isOriginalMode ? (
+          <img
+            src={uiUrl(WALKTHROUGH_ART[step] ?? 'walkthrough_3.webp')}
+            alt=""
+            className="mt-6 w-[76%] object-contain"
+            draggable={false}
+            style={{ filter: dark ? 'brightness(1.05)' : 'none' }}
+          />
+        ) : (
+          <div className="mt-8 h-32">
+            <ForestArt />
+          </div>
+        )}
       </motion.div>
 
-      <div
-        className="mx-4 mb-4 rounded-[var(--radius-l)] p-4 text-center"
-        style={{ background: 'var(--forest-teal-000)' }}
-      >
-        <p className="text-body2 text-[var(--forest-teal-600)]">{t('onboarding.swipeDown')}</p>
-      </div>
+      {(!isOriginalMode || last) && (
+        <div className="relative z-10 flex flex-col items-center px-6 pb-6" style={{ gap: 12 }}>
+          {isOriginalMode && (
+            <p className="text-body2 font-bold text-[var(--forest-teal-600)]">{t('onboarding.swipeDown')}</p>
+          )}
+          <Button variant="accentTeal" long full onClick={next}>
+            {last ? t('onboarding.finish') : t('onboarding.continue')}
+          </Button>
+        </div>
+      )}
 
-      <div className="px-6 pb-6">
-        <Button variant="accentTeal" long full onClick={next}>
-          {step >= pages.length - 1 ? t('onboarding.finish') : t('onboarding.continue')}
-        </Button>
-      </div>
+      {isOriginalMode && !last && (
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex items-end justify-center pb-16"
+          style={{
+            height: '22%',
+            background: 'linear-gradient(180deg, rgba(165,227,208,0) 0%, rgba(165,227,208,0.9) 80%)',
+          }}
+        >
+          <span className="text-body2 text-white">{t('onboarding.swipeDown')}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -91,6 +91,7 @@ const SEMANTICS = {
   fakeBackground: ['fake_background'],
   emptyForest: ['empty_forest_placeholder'],
   failureReasonBtn: ['failure_reason_btn'],
+  webLogo: ['web_logo'],
 };
 
 function fail(msg) {
