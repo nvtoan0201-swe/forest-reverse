@@ -18,5 +18,9 @@ plans/
 public/assets/**
 !public/assets/.gitkeep
 
+# --- Parity harness + original-mode assets (never commit) ---
+public/assets-original/
+parity/
+
 # generated catalogs may be regenerated from scripts; committed by default
 src/assets/catalog/*.tmp.json

@@ -1,15 +1,21 @@
 import type { SVGProps } from 'react';
+import { iconUrl } from '../assets';
 
 /**
- * Minimal self-authored icon set (stroke style). Replaces the original
- * drawable set — see legal notes: no original artwork is shipped.
+ * Icon set.
+ *
+ * - placeholder mode: self-authored inline SVG (no original artwork shipped).
+ * - original mode: the real drawable when the icon map has a mapping, falling
+ *   back to the inline SVG for icons without a verified original.
+ *
+ * The public API (`name`, `size`, `filled`) is unchanged for existing callers.
  */
 export const ICON_PATHS = {
   menu: 'M4 7h16M4 12h16M4 17h16',
   timer: 'M12 8v5l3 2|M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18|M9 3h6',
   focus: 'M12 4a6 6 0 0 1 6 6c0 3-2 4-2 7H8c0-3-2-4-2-7a6 6 0 0 1 6-6z|M10 20h4',
   leaf: 'M5 19c8 1 14-4 14-13-9 0-14 5-14 13z|M5 19c2-4 5-7 9-9',
-  coin: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z|M12 8v8|M9.5 10a2.5 2 0 0 1 5 0c0 2-5 2-5 4a2.5 2 0 0 0 5 0',
+  coin: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z|M12 8v8|M9.5 10a2.5 2.5 0 0 1 5 0c0 2-5 2-5 4a2.5 2.5 0 0 0 5 0',
   plus: 'M12 5v14M5 12h14',
   gem: 'M6 4h12l3 6-9 10L3 10z|M3 10h18|M9 4l3 6 3-6|M12 10v10',
   headphone: 'M4 14v-2a8 8 0 0 1 16 0v2|M4 14h3v6H5a1 1 0 0 1-1-1z|M20 14h-3v6h2a1 1 0 0 0 1-1z',
@@ -54,6 +60,34 @@ export const ICON_PATHS = {
 
 export type IconName = keyof typeof ICON_PATHS;
 
+/** Icon name -> semantic key in icon-map.generated.json (P-100). */
+// eslint-disable-next-line react-refresh/only-export-components
+export const ORIGINAL_ICON_KEYS: Partial<Record<IconName, string>> = {
+  menu: 'menu',
+  timer: 'modeTimer',
+  focus: 'modeFocusOn',
+  coin: 'coinLarge',
+  plus: 'addCoin',
+  gem: 'gem',
+  headphone: 'headphone',
+  headphoneMute: 'headphoneMute',
+  back: 'back',
+  note: 'note',
+  share: 'share',
+  relax: 'drawerRelax',
+  timeline: 'drawerTimeline',
+  tag: 'drawerTag',
+  store: 'drawerStore',
+  settings: 'drawerSettings',
+  shield: 'drawerShield',
+  friends: 'drawerFriend',
+  achievement: 'drawerAchievement',
+  news: 'drawerNews',
+  realTree: 'drawerRealTree',
+  challenge: 'drawerChallenge',
+  snow: 'snow',
+};
+
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
   name: IconName;
   size?: number;
@@ -61,6 +95,24 @@ interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
 }
 
 export function Icon({ name, size = 24, filled = false, ...rest }: IconProps) {
+  const semantic = ORIGINAL_ICON_KEYS[name];
+  const url = semantic ? iconUrl(semantic) : null;
+
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt=""
+        aria-hidden="true"
+        width={size}
+        height={size}
+        draggable={false}
+        className={rest.className}
+        style={{ width: size, height: size, objectFit: 'contain', display: 'block', ...rest.style }}
+      />
+    );
+  }
+
   const paths = ICON_PATHS[name].split('|');
   return (
     <svg

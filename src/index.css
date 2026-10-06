@@ -71,7 +71,7 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* 3D press shadow for buttons */
+/* 3D press shadow for buttons (press transform driven by Framer Motion) */
 .fg-button {
   position: relative;
   display: inline-flex;
@@ -84,10 +84,8 @@
   color: var(--text-on-button);
   background: var(--fg-bg, var(--brand));
   cursor: pointer;
-  transition:
-    transform 90ms ease,
-    filter 90ms ease;
   user-select: none;
+  will-change: transform;
 }
 .fg-button::after {
   content: '';
@@ -98,14 +96,11 @@
   background: var(--fg-shadow-color, var(--brand-variant));
   transition: height 90ms ease;
 }
-.fg-button:active:not(:disabled) {
-  transform: translateY(var(--fg-shadow, 4px));
-}
 .fg-button:active:not(:disabled)::after {
   height: calc(var(--fg-shadow, 4px) / 3);
 }
 .fg-button:disabled {
-  opacity: 0.45;
+  opacity: var(--button-disabled-opacity, 0.45);
   cursor: not-allowed;
 }
 

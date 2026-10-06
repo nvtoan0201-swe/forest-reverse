@@ -134,6 +134,28 @@
   --yellow-800: #7c5c00;
   --yellow-900: #594100;
 
+  /* Alpha ramps (docs/07 §1.2) */
+  --alpha-black-000: #0d000000;
+  --alpha-black-100: #1a000000;
+  --alpha-black-200: #33000000;
+  --alpha-black-300: #4d000000;
+  --alpha-black-400: #66000000;
+  --alpha-black-500: #80000000;
+  --alpha-black-600: #99000000;
+  --alpha-black-700: #b2000000;
+  --alpha-black-800: #cc000000;
+  --alpha-black-900: #e5000000;
+  --alpha-white-000: #0dffffff;
+  --alpha-white-100: #1affffff;
+  --alpha-white-200: #33ffffff;
+  --alpha-white-300: #4dffffff;
+  --alpha-white-400: #66ffffff;
+  --alpha-white-500: #80ffffff;
+  --alpha-white-600: #99ffffff;
+  --alpha-white-700: #b2ffffff;
+  --alpha-white-800: #ccffffff;
+  --alpha-white-900: #e5ffffff;
+
   /* Semantic */
   --bg-primary: var(--gray-200);
   --bg-secondary: var(--gray-100);
@@ -153,30 +175,82 @@
   --plantball: var(--citron-200);
   --plantball-border: var(--citron-300);
   --plantball-store: var(--yellow-100);
+  --switch-button: #74b6a0;
   --text-primary: var(--gray-900);
   --text-secondary: var(--gray-600);
   --text-tertiary: var(--gray-500);
   --text-placeholder: var(--gray-300);
+  --text-placeholder-variant: var(--gray-400);
   --text-error: var(--red-400);
+  --text-error-crystal: var(--cyan-300);
   --text-link: var(--forest-teal-400);
   --text-status: var(--forest-teal-600);
   --text-on-button: #ffffff;
   --text-note: var(--citron-200);
   --text-white-warm: #e3dac7;
+  --text-brown: #714406;
   --coin: #ffda01;
   --coin-deep: #f2c00d;
   --gem: #4ec5d3;
-  --divider: rgba(0, 0, 0, 0.05);
-  --dim: rgba(0, 0, 0, 0.6);
+  --divider: var(--alpha-black-000);
+  --dim: var(--alpha-black-600);
+  --toast-bg: var(--alpha-black-800);
   --success: #34c759;
   --error: #ff3b30;
   --warning: #ff9500;
 
+  /* App-specific colours used directly by layouts (docs/07 §1.4) */
+  --color-bg-green: #43765f;
+  --color-nav-green: #264137;
+  --color-dark-green: #111d1a;
+  --color-medium-green: #16362a;
+  --color-ultra-dark-green: #0c1e17;
+  --color-profile-background: #183229;
+  --color-light-green: #51a387;
+  --color-white: #ffffff;
+  --color-dark-brown: #503212;
+  --color-light-brown: #6f4417;
+  --special-offer-yellow: #e8c341;
+  --special-offer-shadow-yellow: #d9b021;
+  --gem-store-yellow: #f2c00d;
+  --gem-store-button-yellow: #f0ce56;
+  --gem-store-button-shadow-yellow: #dbb429;
+  --earthday-text-yellow: #fce124;
+  --earthday-toggle-yellow: #ead94e;
+  --exlt-yellow: #fef0bf;
+  --medium-yellow: #fee05b;
+  --accent-green-raw: #8bc230;
+  --progress-tint: #8bd100;
+  --green-8cc914: #8cc914;
+  --green-69960f: #69960f;
+
+  /* Button palette (background / shadow) */
+  --button-accent-green-bg: #8dc925;
+  --button-accent-green-shadow: #64a408;
+  --button-accent-teal-bg: #67d0ac;
+  --button-accent-teal-shadow: #278063;
+  --button-accent-yellow-bg: #f1c21b;
+  --button-accent-yellow-shadow: #daa700;
+  --button-gray-bg: #c9c9c9;
+  --button-gray-shadow: #888888;
+  --button-red-bg: #f26663;
+  --button-red-shadow: #db3328;
+  --button-tinytan-bg: #ab8bcf;
+  --button-tinytan-shadow: #8b71a8;
+  --button-disabled-opacity: 0.45;
+
   /* Gradients */
   --gradient-premium: linear-gradient(90deg, #51a387, #add886);
+  --gradient-referral-border: linear-gradient(90deg, #add886, #8aba5f);
+  --gradient-highlight: linear-gradient(
+    180deg,
+    rgb(173 216 134 / 0) 0%,
+    rgb(173 216 134 / 0.5) 52.1%
+  );
   --gradient-discount: linear-gradient(90deg, #db5417, #e86b32);
   --gradient-splash: linear-gradient(180deg, #67d0ac, #51a387);
   --gradient-subscription: linear-gradient(135deg, #81d200 7%, #0ebc73 50%, #08c1f3 88%);
+  --gradient-subscription-shadow: linear-gradient(135deg, #55a507 6%, #179a4b 50%, #0085a4 94%);
 
   /* Radius / border / spacing */
   --radius-xs: 2px;
@@ -196,9 +270,37 @@
   --button-height: 40px;
   --button-height-big: 50px;
   --button-height-chip: 30px;
+  --button-width: 120px;
+  --button-width-long: 250px;
+  --button-width-big: 180px;
+  --topbar-menu-size: 40px;
+  --topbar-menu-margin: 15px;
+  --red-dot-size: 4px;
+  --topbar-red-dot-size: 6px;
+  --mode-icon-size: 25px;
+  --coin-icon-size: 34px;
+  --tag-chip-max-width: 220px;
+  --tag-dot-size: 8px;
+  --tag-edit-size: 16px;
+  --drawer-item-height: 30px;
+  --drawer-icon-size: 24px;
+  --giveup-min-width: 80px;
+  --giveup-pad-h: 16px;
+  --giveup-pad-v: 4px;
+  --result-relax-width: 220px;
+  --result-relax-height: 50px;
+  --result-action-size: 40px;
+  --result-action-gap: 36px;
+  --result-top-pad-h: 81px;
+  --onboard-continue-height: 98px;
 
   /* Typography */
-  --font-family: 'Source Sans Pro', 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-family: 'Source Sans Pro', 'Source Sans 3', -apple-system, 'Segoe UI', sans-serif;
+  --font-numbers: 'Roboto Medium Numbers', 'SF Mono', 'Roboto', monospace;
+  --tracking-none: 0;
+  --tracking-sm: 0.02em;
+  --tracking-md: 0.03em;
+  --tracking-la: 0.08em;
   --text-headline1: 600 36px/44px var(--font-family);
   --text-headline2: 900 26px/36px var(--font-family);
   --text-headline3: 700 24px/34px var(--font-family);
@@ -214,6 +316,8 @@
   --text-button2: 400 16px/20px var(--font-family);
   --text-button3: 400 14px/20px var(--font-family);
   --text-button4: 700 14px/18px var(--font-family);
+  /* Auto-size ladder for plant_time / growing_time (Forest.Text.*Auto) */
+  --text-auto-steps: 10px, 12px, 14px, 16px, 18px, 20px, 24px, 80px;
 
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-drop: 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -252,6 +356,26 @@ textarea {
 :focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+/* Letter-spacing utilities (integers.xml: no-space/sm/md/la) */
+.ls-none {
+  letter-spacing: var(--tracking-none);
+}
+.ls-sm {
+  letter-spacing: var(--tracking-sm);
+}
+.ls-md {
+  letter-spacing: var(--tracking-md);
+}
+.ls-la {
+  letter-spacing: var(--tracking-la);
+}
+
+/* Clock / coin numerals use Roboto Medium Numbers in the original. */
+.text-numbers {
+  font-family: var(--font-numbers);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {

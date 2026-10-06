@@ -8,30 +8,45 @@
  *   synthesized WAV audio. 100% self-authored, safe to ship.
  *
  *   VITE_ASSET_MODE=original — copies decoded artwork from the private reverse
- *   workspace (../apktool_out, ../apk_extracted). LOCAL DEV ONLY, never commit.
+ *   workspace (../apktool_out, ../apk_extracted) into public/assets-original/.
+ *   LOCAL DEV ONLY, never commit (see .gitignore).
  *
- * Usage: node scripts/extract-assets.mjs [--force] [--quiet] [--mode=original|placeholder]
+ * Usage: node scripts/extract-assets.mjs [--force] [--quiet]
+ *          [--mode=original|placeholder] [--only=trees,frames,icons,ui,fonts,sounds,rive,lottie,landing]
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const workspace = join(root, '..');
 const args = process.argv.slice(2);
 const force = args.includes('--force');
 const quiet = args.includes('--quiet');
 const modeArg = args.find((a) => a.startsWith('--mode='));
 const mode = (modeArg?.split('=')[1] ?? process.env.VITE_ASSET_MODE ?? 'placeholder').trim();
+const onlyArg = args.find((a) => a.startsWith('--only='));
+const only = onlyArg ? new Set(onlyArg.split('=')[1].split(',').map((s) => s.trim())) : null;
 
 const catalog = JSON.parse(readFileSync(join(root, 'src/assets/catalog/tree-types.json'), 'utf8'));
+const workspaceTrees = existsSync(join(workspace, 'assets_catalog/trees.json'))
+  ? JSON.parse(readFileSync(join(workspace, 'assets_catalog/trees.json'), 'utf8'))
+  : [];
 const sounds = JSON.parse(readFileSync(join(root, 'src/assets/catalog/ambient-sounds.json'), 'utf8'));
+const iconMap = JSON.parse(readFileSync(join(root, 'src/assets/catalog/icon-map.generated.json'), 'utf8'));
+const treeAnimations = existsSync(join(workspace, 'assets_catalog/tree_animations.json'))
+  ? JSON.parse(readFileSync(join(workspace, 'assets_catalog/tree_animations.json'), 'utf8'))
+  : [];
 
 const PUBLIC = join(root, 'public/assets');
+const ORIGINAL = join(root, 'public/assets-original');
 let written = 0;
 let skipped = 0;
+const missing = [];
 
-function write(rel, data) {
-  const target = join(PUBLIC, rel);
+function write(rel, data, baseDir = PUBLIC) {
+  const target = join(baseDir, rel);
   if (existsSync(target) && !force) {
     skipped++;
     return;
@@ -40,6 +55,22 @@ function write(rel, data) {
   writeFileSync(target, data);
   written++;
   if (!quiet) console.log(`  ${rel}`);
+}
+
+function copy(src, rel, baseDir = ORIGINAL) {
+  const target = join(baseDir, rel);
+  if (existsSync(target) && !force) {
+    skipped++;
+    return;
+  }
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(src, target);
+  written++;
+  if (!quiet) console.log(`  ${rel}`);
+}
+
+function want(category) {
+  return !only || only.has(category);
 }
 
 /* ------------------------------------------------------------------ */
@@ -119,6 +150,12 @@ ${flowers.join('')}
 }
 
 async function extractPlaceholder() {
+  // A leftover original-mode copy would be served/bundled by mistake, so drop
+  // it unless the caller explicitly wants to keep it for offline use.
+  if (existsSync(ORIGINAL) && !args.includes('--keep-original')) {
+    rmSync(ORIGINAL, { recursive: true, force: true });
+  }
+
   for (const t of catalog) {
     for (let phase = 1; phase <= 7; phase++) {
       write(`trees/${t.gid}/phase_${phase}.svg`, treeSvg(t.gid, t.tier, phase));
@@ -143,6 +180,9 @@ async function extractPlaceholder() {
     sounds: sounds.length,
   };
   write('manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+
+  // Fonts are OFL-licensed and bundled in public/fonts/ for both modes (P-112).
+  extractFonts();
 }
 
 /* ------------------------------------------------------------------ */
@@ -253,42 +293,517 @@ function sfxWav(name) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Original mode (local only)                                         */
+/* Original mode helpers                                              */
 /* ------------------------------------------------------------------ */
 
+const RES_DIR = join(workspace, 'apktool_out/res');
+const RAW_DIR = join(RES_DIR, 'raw');
+const DENSITY_PRIORITY = ['xxhdpi', 'xhdpi', 'hdpi', 'mdpi', 'ldpi', 'nodpi', ''];
+
+let resIndex = null;
+function scanResDirs() {
+  if (resIndex) return resIndex;
+  resIndex = new Map();
+  if (!existsSync(RES_DIR)) return resIndex;
+  for (const dir of readdirSync(RES_DIR)) {
+    if (!dir.startsWith('drawable')) continue;
+    const density = dir === 'drawable' ? '' : dir.replace(/^drawable-/, '').replace(/-.*$/, '');
+    if (!DENSITY_PRIORITY.includes(density)) continue;
+    for (const file of readdirSync(join(RES_DIR, dir))) {
+      const dot = file.lastIndexOf('.');
+      if (dot <= 0) continue;
+      const base = file.slice(0, dot).replace(/\.9$/, '');
+      const ext = file.slice(dot + 1);
+      if (!resIndex.has(base)) resIndex.set(base, []);
+      resIndex.get(base).push({ density, file, ext, path: join(RES_DIR, dir, file) });
+    }
+  }
+  return resIndex;
+}
+
+const IMAGE_EXTS = new Set(['webp', 'png', 'jpg', 'jpeg']);
+
+function pickResFile(resource) {
+  const files = scanResDirs().get(resource);
+  if (!files || files.length === 0) return null;
+  const rank = (f) => {
+    const densityRank = DENSITY_PRIORITY.indexOf(f.density);
+    const extRank = IMAGE_EXTS.has(f.ext) ? 0 : f.ext === 'xml' ? 1 : 2;
+    return [extRank, densityRank < 0 ? DENSITY_PRIORITY.length : densityRank];
+  };
+  return [...files].sort((a, b) => rank(a)[0] - rank(b)[0] || rank(a)[1] - rank(b)[1])[0];
+}
+
+/* --- Android VectorDrawable -> SVG (icons are simple; groups supported) --- */
+
+const colorsCache = new Map();
+function colorRef(name) {
+  if (colorsCache.has(name)) return colorsCache.get(name);
+  let value = null;
+  for (const file of ['colors.xml', 'colors-v31.xml', 'color-night/colors.xml']) {
+    const path = join(RES_DIR, 'values', file);
+    if (!existsSync(path)) continue;
+    const re = new RegExp(`<color name="${name}"[^>]*>([^<]+)</color>`);
+    const m = readFileSync(path, 'utf8').match(re);
+    if (m) {
+      value = m[1].trim();
+      break;
+    }
+  }
+  colorsCache.set(name, value);
+  return value;
+}
+
+function androidColor(value) {
+  if (!value) return null;
+  let v = value.trim();
+  if (v.startsWith('@color/')) v = colorRef(v.slice(7)) ?? '#000000';
+  if (v.startsWith('#')) {
+    if (v.length === 9) {
+      const a = parseInt(v.slice(1, 3), 16) / 255;
+      return `rgba(${parseInt(v.slice(3, 5), 16)},${parseInt(v.slice(5, 7), 16)},${parseInt(v.slice(7, 9), 16)},${a.toFixed(3)})`;
+    }
+    return v;
+  }
+  return v; // named colors are rare in these drawables
+}
+
+function attr(tag, name) {
+  const m = tag.match(new RegExp(`android:${name}="([^"]*)"`));
+  return m ? m[1] : null;
+}
+
+function shapeToSvg(xmlPath) {
+  const src = readFileSync(xmlPath, 'utf8');
+  const shape = src.match(/<shape\b[^>]*>/)?.[0] ?? '';
+  const kind = attr(shape, 'shape') ?? 'rectangle';
+  const solid = androidColor(src.match(/<solid[^>]*android:color="([^"]+)"/)?.[1] ?? null);
+  const stroke = src.match(/<stroke[^>]*>/)?.[0] ?? '';
+  const strokeColor = androidColor(attr(stroke, 'color'));
+  const strokeWidth = parseFloat(attr(stroke, 'width') ?? '0') || 0;
+  const radius = parseFloat(src.match(/<corners[^>]*android:radius="([^"]+)"/)?.[1] ?? '0') || 0;
+  const size = 100;
+  const inset = strokeWidth / 2;
+  if (kind === 'oval') {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" preserveAspectRatio="none"><ellipse cx="${size / 2}" cy="${size / 2}" rx="${size / 2 - inset}" ry="${size / 2 - inset}" fill="${solid ?? 'none'}"${strokeColor ? ` stroke="${strokeColor}" stroke-width="${strokeWidth}"` : ''}/></svg>\n`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" preserveAspectRatio="none"><rect x="${inset}" y="${inset}" width="${size - strokeWidth}" height="${size - strokeWidth}" rx="${radius}" ry="${radius}" fill="${solid ?? 'none'}"${strokeColor ? ` stroke="${strokeColor}" stroke-width="${strokeWidth}"` : ''}/></svg>\n`;
+}
+
+function vectorToSvg(xmlPath) {
+  const src = readFileSync(xmlPath, 'utf8');
+  const vectorTag = src.match(/<vector\b[^>]*>/)?.[0] ?? '';
+  const width = attr(vectorTag, 'width')?.replace('dp', '') ?? '24';
+  const height = attr(vectorTag, 'height')?.replace('dp', '') ?? '24';
+  const vw = attr(vectorTag, 'viewportWidth') ?? width;
+  const vh = attr(vectorTag, 'viewportHeight') ?? height;
+
+  const parts = [];
+  const groupStack = [];
+  const tokenRe = /<(\/?)(group|path)\b([^>]*?)(\/?)>/g;
+  let m;
+  while ((m = tokenRe.exec(src)) !== null) {
+    const [, closing, tag, attrs, selfClose] = m;
+    if (tag === 'group') {
+      if (closing) {
+        const g = groupStack.pop();
+        parts.push(`</g>`);
+        void g;
+      } else {
+        const tx = attr(attrs, 'translateX') ?? '0';
+        const ty = attr(attrs, 'translateY') ?? '0';
+        const sx = attr(attrs, 'scaleX') ?? '1';
+        const sy = attr(attrs, 'scaleY') ?? '1';
+        const rot = attr(attrs, 'rotation') ?? '0';
+        const px = attr(attrs, 'pivotX') ?? '0';
+        const py = attr(attrs, 'pivotY') ?? '0';
+        const transforms = [`translate(${tx} ${ty})`];
+        if (rot !== '0') transforms.push(`rotate(${rot} ${px} ${py})`);
+        if (sx !== '1' || sy !== '1') transforms.push(`scale(${sx} ${sy})`);
+        parts.push(`<g transform="${transforms.join(' ')}">`);
+        groupStack.push(tag);
+      }
+      continue;
+    }
+    if (closing || !attrs) continue;
+    const pathData = attr(attrs, 'pathData');
+    if (!pathData) continue;
+    const fill = androidColor(attr(attrs, 'fillColor'));
+    const stroke = androidColor(attr(attrs, 'strokeColor'));
+    const fillAlpha = attr(attrs, 'fillAlpha');
+    const strokeAlpha = attr(attrs, 'strokeAlpha');
+    const strokeWidth = attr(attrs, 'strokeWidth');
+    const strokeCap = attr(attrs, 'strokeLineCap');
+    const strokeJoin = attr(attrs, 'strokeLineJoin');
+    const fillType = attr(attrs, 'fillType');
+    const svgAttrs = [`d="${pathData}"`];
+    svgAttrs.push(fill ? `fill="${fill}"` : 'fill="none"');
+    if (stroke) svgAttrs.push(`stroke="${stroke}"`);
+    if (strokeWidth) svgAttrs.push(`stroke-width="${strokeWidth}"`);
+    if (strokeCap) svgAttrs.push(`stroke-linecap="${strokeCap.toLowerCase()}"`);
+    if (strokeJoin) svgAttrs.push(`stroke-linejoin="${strokeJoin.toLowerCase()}"`);
+    if (fillAlpha) svgAttrs.push(`fill-opacity="${fillAlpha}"`);
+    if (strokeAlpha) svgAttrs.push(`stroke-opacity="${strokeAlpha}"`);
+    if (fillType === 'evenOdd') svgAttrs.push('fill-rule="evenodd"');
+    parts.push(`<path ${svgAttrs.join(' ')}/>`);
+    void selfClose;
+  }
+  if (parts.length === 0) return null;
+  while (groupStack.length) {
+    parts.push('</g>');
+    groupStack.pop();
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${vw} ${vh}">${parts.join('')}</svg>\n`;
+}
+
+/* --- categories --------------------------------------------------- */
+
+const PHASE_TARGETS = {
+  dead: 'dead',
+  product: 'product',
+  launch: 'launch',
+};
+
+function phaseTarget(key) {
+  if (PHASE_TARGETS[key]) return PHASE_TARGETS[key];
+  const m = key.match(/^([1-7])(webp)?$/);
+  if (m) return `phase_${m[1]}`;
+  const x = key.match(/^([1-7])_christmas$/);
+  if (x) return `phase_${x[1]}_christmas`;
+  return null;
+}
+
+function extractTrees() {
+  for (const t of workspaceTrees) {
+    if (!t.has_local_files || !t.phases) continue;
+    const targets = new Map();
+    for (const [key, byDensity] of Object.entries(t.phases)) {
+      const name = phaseTarget(key);
+      if (!name) continue;
+      for (const [density, rel] of Object.entries(byDensity)) {
+        const densityRank = DENSITY_PRIORITY.indexOf(density.replace('drawable-', ''));
+        if (densityRank < 0) continue;
+        const ext = rel.endsWith('.png') ? 'png' : 'webp';
+        const candidate = { rel, ext, densityRank, isWebp: ext === 'webp' ? 0 : 1 };
+        const current = targets.get(name);
+        if (
+          !current ||
+          candidate.isWebp < current.isWebp ||
+          (candidate.isWebp === current.isWebp && candidate.densityRank < current.densityRank)
+        ) {
+          targets.set(name, candidate);
+        }
+      }
+    }
+    for (const [name, candidate] of targets) {
+      const src = join(workspace, 'apktool_out', candidate.rel);
+      if (!existsSync(src)) {
+        missing.push(`tree ${t.gid}/${name}`);
+        continue;
+      }
+      copy(src, `trees/${t.gid}/${name}.${candidate.ext}`);
+    }
+  }
+}
+
+function extractFrames() {
+  if (treeAnimations.length === 0) {
+    missing.push('assets_catalog/tree_animations.json');
+    return;
+  }
+  const frameDir = join(RES_DIR, 'drawable');
+  for (const group of treeAnimations) {
+    const xmas = group.christmas_variant ? '_christmas' : '';
+    const groupName = `${group.state}_phase_${group.phase}${xmas}`;
+    for (let idx = 0; idx < group.frame_count; idx++) {
+      const file = `frame_${group.state}_tree_type_${group.gid}_phase_${group.phase}${xmas}_${String(idx).padStart(2, '0')}.webp`;
+      const src = join(frameDir, file);
+      if (!existsSync(src)) {
+        missing.push(`frame ${group.gid}/${groupName}/${idx}`);
+        continue;
+      }
+      copy(src, `trees/${group.gid}/anim/${groupName}_${String(idx).padStart(2, '0')}.webp`);
+    }
+  }
+}
+
+const UI_SEMANTICS = new Set([
+  'plantBall',
+  'plantBallXmas',
+  'groundPieceXmas',
+  'walkthrough1',
+  'walkthrough2',
+  'walkthrough3',
+  'walkthroughBg1',
+  'walkthroughBgAll',
+  'walkthroughPrivacy',
+  'tutorialForest',
+  'tutorialSocial',
+  'tutorialSoil',
+  'tutorialStudying',
+  'tutorialWorking',
+  'tutorialTree0',
+  'tutorialTree1',
+  'tutorialTree2',
+  'newLabel',
+  'pageBackground',
+  'hazeNoise',
+  'fakeBackground',
+  'emptyForest',
+]);
+
+function extractIconsAndUi() {
+  for (const [semantic, entry] of Object.entries(iconMap)) {
+    const picked = pickResFile(entry.resource);
+    if (!picked) {
+      missing.push(`icon ${semantic} (${entry.resource})`);
+      continue;
+    }
+    const sub = UI_SEMANTICS.has(semantic) ? 'ui' : 'icons';
+    if (IMAGE_EXTS.has(picked.ext)) {
+      const out = `${entry.resource}.${picked.ext}`;
+      copy(picked.path, `${sub}/${out}`);
+    } else {
+      const svg = convertDrawableToSvg(picked.path);
+      if (!svg) {
+        missing.push(`icon ${semantic} (${entry.resource}: vector conversion failed)`);
+        continue;
+      }
+      write(`${sub}/${entry.resource}.svg`, svg, ORIGINAL);
+    }
+  }
+
+  // Sound cover art (22 covers) for the sound store/picker.
+  const coverDir = join(RES_DIR, 'drawable-xxhdpi');
+  const covers = scanDirSafe(coverDir).filter((f) => /^(ambient_sound_|sound_)[a-z0-9_]+\.webp$/.test(f));
+  for (const file of covers) {
+    copy(join(coverDir, file), `ui/sounds/${file}`);
+  }
+
+  // Landing webview bundle (verbatim, self-contained).
+  const landing = join(RAW_DIR, 'landing_html.html');
+  if (existsSync(landing)) copy(landing, 'ui/landing.html');
+  else missing.push('landing_html.html');
+}
+
+function scanDirSafe(dir) {
+  return existsSync(dir) ? readdirSync(dir) : [];
+}
+
+function convertDrawableToSvg(xmlPath) {
+  const src = readFileSync(xmlPath, 'utf8');
+  if (src.includes('<vector')) return vectorToSvg(xmlPath);
+  if (src.includes('<shape')) return shapeToSvg(xmlPath);
+  return null;
+}
+
+const AMBIENT_FILES = {
+  0: 'rain_forest',
+  1: 'paris_cafe',
+  2: 'thunder_rain',
+  3: 'newyork_time_square',
+  4: 'night_forest',
+  5: 'sandy_beach',
+  6: 'lofi_i_6',
+  7: 'lofi_i_7',
+  8: 'lofi_i_8',
+  9: 'lofi_ii_9',
+  10: 'lofi_ii_10',
+  11: 'lofi_ii_11',
+  12: 'lofi_iii_12',
+  13: 'lofi_iii_13',
+  14: 'lofi_iii_14',
+  15: 'fireplace_15',
+  16: 'waterfall_white_16',
+  17: 'waterfall_brown_17',
+  18: 'japanese_garden_18',
+  19: 'waterfall_pink_19',
+  20: 'examination_time_20',
+  21: 'ambient_sound_21',
+  22: 'ambient_sound_22',
+  23: 'ambient_sound_23',
+  24: 'ambient_sound_24',
+  25: 'ambient_sound_25',
+  26: 'ambient_sound_26',
+  27: 'ambient_sound_27',
+  28: 'ambient_sound_28',
+  29: 'ambient_sound_29',
+  30: 'ambient_sound_30',
+  31: 'ambient_sound_31',
+  32: 'ambient_sound_32',
+};
+
+const SFX_FILES = {
+  click: 'sound_click1.ogg',
+  slide: 'sound_slide.ogg',
+  tree0: 'sound_tree0.ogg',
+  tree1: 'sound_tree1.ogg',
+  tree2: 'sound_tree2.ogg',
+  ring: 'sound_ring_c.ogg',
+};
+
+function extractSounds() {
+  for (const s of sounds) {
+    const name = AMBIENT_FILES[s.gid];
+    if (!name) {
+      missing.push(`ambient ${s.gid}`);
+      continue;
+    }
+    const src = join(RAW_DIR, `${name}.ogg`);
+    if (!existsSync(src)) {
+      missing.push(`ambient ${name}.ogg`);
+      continue;
+    }
+    copy(src, `sounds/ambient/${s.gid}.ogg`);
+  }
+  for (const [key, file] of Object.entries(SFX_FILES)) {
+    const src = join(RAW_DIR, file);
+    if (!existsSync(src)) {
+      missing.push(`sfx ${file}`);
+      continue;
+    }
+    copy(src, `sounds/sfx/${key}.ogg`);
+  }
+}
+
+const RIVE_MAP = {
+  'cta.riv': 'cta.riv',
+  'relax_breathe_riv.riv': 'relax_breathe.riv',
+  'relax_onboarding_riv.riv': 'relax_onboarding.riv',
+  'relax_theme_1_riv.riv': 'relax_theme_1.riv',
+  'relax_theme_2_riv.riv': 'relax_theme_2.riv',
+  'relax_theme_3_riv.riv': 'relax_theme_3.riv',
+  'relax_theme_4_riv.riv': 'relax_theme_4.riv',
+  'relax_theme_5_riv.riv': 'relax_theme_5.riv',
+  'task_system.riv': 'task_system.riv',
+  'time_guard_intro_riv.riv': 'time_guard_intro.riv',
+};
+
+function extractRive() {
+  for (const [src, out] of Object.entries(RIVE_MAP)) {
+    const path = join(RAW_DIR, src);
+    if (!existsSync(path)) {
+      missing.push(`rive ${src}`);
+      continue;
+    }
+    copy(path, `ui/${out}`);
+  }
+}
+
+const LOTTIE_MAP = [
+  [join(workspace, 'apk_extracted/assets/rainbow_bridge.json'), 'rainbow_bridge.json'],
+  [join(workspace, 'apk_extracted/assets/pending_anim.json'), 'pending_anim.json'],
+  [join(RAW_DIR, 'event_ribbon.json'), 'event_ribbon.json'],
+  [join(RAW_DIR, 'progress_bar_loading.json'), 'progress_bar_loading.json'],
+  [join(RAW_DIR, 'settings_gift_box_icon.json'), 'gift_box_icon.json'],
+  [join(RAW_DIR, 'lottie_special_offer_button.json'), 'special_offer_button.json'],
+];
+
+function extractLottie() {
+  for (const [src, out] of LOTTIE_MAP) {
+    if (!existsSync(src)) {
+      missing.push(`lottie ${out}`);
+      continue;
+    }
+    copy(src, `ui/${out}`);
+  }
+}
+
+function extractFonts() {
+  try {
+    execFileSync(process.execPath, [join(root, 'scripts/extract-fonts.mjs'), '--quiet', ...(force ? ['--force'] : [])], {
+      stdio: 'inherit',
+    });
+  } catch {
+    missing.push('fonts (extract-fonts.mjs failed)');
+  }
+}
+
+function normalizeTreeExtensions() {
+  // ImageMagick is optional; when present, normalise PNG trees to WebP so the
+  // runtime can resolve a single extension. The app also has a .png fallback.
+  let magick = null;
+  try {
+    execFileSync('magick', ['-version'], { stdio: 'ignore' });
+    magick = 'magick';
+  } catch {
+    try {
+      execFileSync('convert', ['-version'], { stdio: 'ignore' });
+      magick = 'convert';
+    } catch {
+      magick = null;
+    }
+  }
+  if (!magick) {
+    if (!quiet) console.log('  (magick not found — keeping PNG trees as .png)');
+    return;
+  }
+  const treeRoot = join(ORIGINAL, 'trees');
+  if (!existsSync(treeRoot)) return;
+  for (const gid of readdirSync(treeRoot)) {
+    const dir = join(treeRoot, gid, '');
+    if (!statSync(dir).isDirectory()) continue;
+    for (const file of readdirSync(dir)) {
+      if (!file.endsWith('.png')) continue;
+      const src = join(dir, file);
+      const out = join(dir, file.replace(/\.png$/, '.webp'));
+      if (existsSync(out)) continue;
+      try {
+        execFileSync(magick, [src, '-quality', '90', out], { stdio: 'ignore' });
+        rmSync(src, { force: true });
+        written++;
+        if (!quiet) console.log(`  trees/${gid}/${file.replace(/\.png$/, '.webp')}`);
+      } catch {
+        missing.push(`convert ${gid}/${file}`);
+      }
+    }
+  }
+}
+
 async function extractOriginal() {
-  const workspace = join(root, '..');
-  const drawables = [
-    join(workspace, 'apktool_out/res/drawable-xxhdpi'),
-    join(workspace, 'apktool_out/res/drawable-xhdpi'),
-    join(workspace, 'apktool_out/res/drawable-hdpi'),
-  ].filter(existsSync);
-  if (drawables.length === 0) {
+  if (!existsSync(RES_DIR) || !existsSync(join(RES_DIR, 'values/public.xml'))) {
     console.error('original mode: decoded resources not found (../apktool_out).');
     console.error('Run placeholder mode instead, or keep the private workspace present.');
     process.exitCode = 1;
     return;
   }
-  const { copyFileSync } = await import('node:fs');
-  const pick = (file) => {
-    for (const dir of drawables) {
-      const candidate = join(dir, file);
-      if (existsSync(candidate)) return candidate;
-    }
-    return null;
-  };
-  for (const t of catalog) {
-    for (let phase = 1; phase <= 7; phase++) {
-      const src = pick(`tree_type_${t.gid}_phase_${phase}.webp`) ?? pick(`tree_type_${t.gid}_phase_${phase}.png`);
-      if (!src) continue;
-      const ext = src.endsWith('.png') ? 'png' : 'webp';
-      const target = join(PUBLIC, `trees/${t.gid}/phase_${phase}.${ext}`);
-      mkdirSync(dirname(target), { recursive: true });
-      copyFileSync(src, target);
-      written++;
-    }
+  if (want('trees')) extractTrees();
+  if (want('frames')) extractFrames();
+  if (want('icons') || want('ui')) extractIconsAndUi();
+  if (want('sounds')) extractSounds();
+  if (want('rive')) extractRive();
+  if (want('lottie')) extractLottie();
+  if (want('fonts')) extractFonts();
+  normalizeTreeExtensions();
+
+  write(
+    'manifest.json',
+    JSON.stringify(
+      {
+        mode: 'original',
+        generatedAt: new Date().toISOString(),
+        categories: [...(only ?? ['all'])],
+        missing: missing.length,
+      },
+      null,
+      2,
+    ) + '\n',
+    ORIGINAL,
+  );
+
+  mkdirSync(join(root, 'parity'), { recursive: true });
+  writeFileSync(
+    join(root, 'parity/asset-missing.md'),
+    `# Missing original assets\n\nGenerated ${new Date().toISOString()}\n\n${
+      missing.length ? missing.map((m) => `- ${m}`).join('\n') : '_None._'
+    }\n`,
+  );
+  if (missing.length) {
+    console.warn(`original mode: ${missing.length} missing asset(s) — see parity/asset-missing.md`);
+  } else if (!quiet) {
+    console.log('original mode: all mapped assets present');
   }
-  console.warn('original mode: artwork copied locally. DO NOT COMMIT public/assets/**');
+  console.warn('original mode: artwork copied locally. DO NOT COMMIT public/assets-original/**');
 }
 
 if (mode === 'original') {

@@ -1,10 +1,31 @@
 import { defineConfig } from 'vitest/config';
+import { existsSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * Release guard (P-108): a public/placeholder build must never bundle the
+ * local-only original artwork directory.
+ */
+function guardOriginalAssets() {
+  return {
+    name: 'guard-original-assets',
+    apply: 'build' as const,
+    configResolved() {
+      const mode = process.env.VITE_ASSET_MODE ?? 'placeholder';
+      if (mode !== 'original' && existsSync('public/assets-original')) {
+        throw new Error(
+          'public/assets-original/ exists — run `node scripts/extract-assets.mjs --mode=placeholder` (or verify-assets --mode=release) before a public build.',
+        );
+      }
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
+    guardOriginalAssets(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -26,10 +47,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,json,woff2}'],
-        navigateFallbackDenylist: [/^\/assets\//],
+        navigateFallbackDenylist: [/^\/(assets|assets-original)\//],
         runtimeCaching: [
           {
-            urlPattern: /\/assets\/(trees|sounds|ui)\/.*/i,
+            urlPattern: /\/(assets|assets-original)\/(trees|sounds|ui)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'fg-assets',
@@ -46,6 +67,9 @@ export default defineConfig({
       devOptions: { enabled: false },
     }),
   ],
+  server: {
+    watch: process.env.VITE_USE_POLLING === '1' ? { usePolling: true, interval: 300 } : undefined,
+  },
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 900,

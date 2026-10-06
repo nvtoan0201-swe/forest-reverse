@@ -1,0 +1,401 @@
+{
+  "menu": {
+    "field": "f36567y1",
+    "id": "0x7f080a51",
+    "resource": "menu_btn",
+    "file": "menu_btn.webp",
+    "density": "xxhdpi"
+  },
+  "modeTimer": {
+    "field": "H",
+    "id": "0x7f080148",
+    "resource": "countdown_mode_main_page",
+    "file": "countdown_mode_main_page.svg",
+    "density": "base"
+  },
+  "modeFocusOff": {
+    "field": "M0",
+    "id": "0x7f08093a",
+    "resource": "ic_focus_mode_off",
+    "file": "ic_focus_mode_off.svg",
+    "density": "base"
+  },
+  "modeFocusOn": {
+    "field": "L0",
+    "id": "0x7f080939",
+    "resource": "ic_focus_mode",
+    "file": "ic_focus_mode.svg",
+    "density": "base"
+  },
+  "coinLarge": {
+    "field": "f36447e1",
+    "id": "0x7f080987",
+    "resource": "ic_s_coin_large",
+    "file": "ic_s_coin_large.svg",
+    "density": "base"
+  },
+  "addCoin": {
+    "field": "f36433c",
+    "id": "0x7f0800f1",
+    "resource": "add_coin",
+    "file": "add_coin.svg",
+    "density": "base"
+  },
+  "gem": {
+    "field": "f36524r0",
+    "id": "0x7f0808c8",
+    "resource": "gem_icon_border",
+    "file": "gem_icon_border.webp",
+    "density": "xxhdpi"
+  },
+  "addGem": {
+    "field": null,
+    "id": "0x7f08090f",
+    "resource": "ic_add_gem",
+    "file": "ic_add_gem.svg",
+    "density": "base"
+  },
+  "headphone": {
+    "field": null,
+    "id": "0x7f080907",
+    "resource": "headphone_btn",
+    "file": "headphone_btn.webp",
+    "density": "mdpi"
+  },
+  "headphoneMute": {
+    "field": "G0",
+    "id": "0x7f08090b",
+    "resource": "headphone_mute_btn",
+    "file": "headphone_mute_btn.webp",
+    "density": "mdpi"
+  },
+  "back": {
+    "field": null,
+    "id": "0x7f080107",
+    "resource": "back_btn2",
+    "file": "back_btn2.webp",
+    "density": "mdpi"
+  },
+  "note": {
+    "field": null,
+    "id": "0x7f0801d2",
+    "resource": "forest_rounded_btn",
+    "file": "forest_rounded_btn.svg",
+    "density": "base"
+  },
+  "share": {
+    "field": null,
+    "id": "0x7f080b3f",
+    "resource": "share_btn",
+    "file": "share_btn.webp",
+    "density": "mdpi"
+  },
+  "giveUpBg": {
+    "field": "f36437c3",
+    "id": "0x7f080b22",
+    "resource": "rounded_corner_twb",
+    "file": "rounded_corner_twb.svg",
+    "density": "xxhdpi"
+  },
+  "snow": {
+    "field": null,
+    "id": "0x7f080b70",
+    "resource": "snowball",
+    "file": "snowball.webp",
+    "density": "base"
+  },
+  "splash": {
+    "field": "f36443d3",
+    "id": "0x7f080b23",
+    "resource": "sapling",
+    "file": "sapling.webp",
+    "density": "xxhdpi"
+  },
+  "premium": {
+    "field": null,
+    "id": "0x7f08099f",
+    "resource": "ic_s_premium_simple",
+    "file": "ic_s_premium_simple.svg",
+    "density": "base"
+  },
+  "storeUnlock": {
+    "field": null,
+    "id": "0x7f080bad",
+    "resource": "store_unlock_btn",
+    "file": "store_unlock_btn.webp",
+    "density": "mdpi"
+  },
+  "storeNew": {
+    "field": "S3",
+    "id": "0x7f080baa",
+    "resource": "store_new",
+    "file": "store_new.png",
+    "density": "xxhdpi"
+  },
+  "coin": {
+    "field": "F",
+    "id": "0x7f080131",
+    "resource": "coin",
+    "file": "coin.webp",
+    "density": "mdpi"
+  },
+  "tagExpand": {
+    "field": "f36507o1",
+    "id": "0x7f0809bb",
+    "resource": "ic_tag_expand",
+    "file": "ic_tag_expand.svg",
+    "density": "base"
+  },
+  "drawerForest": {
+    "field": "f36488l0",
+    "id": "0x7f0801d0",
+    "resource": "forest_btn",
+    "file": "forest_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerTimeline": {
+    "field": "f36462g4",
+    "id": "0x7f080bc6",
+    "resource": "timeline_btn",
+    "file": "timeline_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerShield": {
+    "field": "f36568y2",
+    "id": "0x7f080add",
+    "resource": "proicons_shield",
+    "file": "proicons_shield.svg",
+    "density": "base"
+  },
+  "drawerRelax": {
+    "field": "f36441d1",
+    "id": "0x7f080974",
+    "resource": "ic_relax",
+    "file": "ic_relax.svg",
+    "density": "base"
+  },
+  "drawerTag": {
+    "field": "f36456f4",
+    "id": "0x7f080bc2",
+    "resource": "tag_btn",
+    "file": "tag_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerFriend": {
+    "field": "f36500n0",
+    "id": "0x7f0808c4",
+    "resource": "friend_btn",
+    "file": "friend_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerAchievement": {
+    "field": "f36421a",
+    "id": "0x7f0800ef",
+    "resource": "achievement_btn",
+    "file": "achievement_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerStore": {
+    "field": "R3",
+    "id": "0x7f080b91",
+    "resource": "store_btn",
+    "file": "store_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerRealTree": {
+    "field": "D2",
+    "id": "0x7f080ae7",
+    "resource": "real_tree_btn",
+    "file": "real_tree_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerNews": {
+    "field": "B1",
+    "id": "0x7f080a8f",
+    "resource": "news_btn",
+    "file": "news_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerSettings": {
+    "field": "f36461g3",
+    "id": "0x7f080b28",
+    "resource": "setting_btn",
+    "file": "setting_btn.webp",
+    "density": "xxhdpi"
+  },
+  "drawerChallenge": {
+    "field": "T0",
+    "id": "0x7f08095d",
+    "resource": "ic_menu_task",
+    "file": "ic_menu_task.webp",
+    "density": "xxhdpi"
+  },
+  "drawerStarter": {
+    "field": "S0",
+    "id": "0x7f08095c",
+    "resource": "ic_menu_starter_challenges",
+    "file": "ic_menu_starter_challenges.webp",
+    "density": "xxhdpi"
+  },
+  "plantBall": {
+    "field": "J1",
+    "id": "0x7f080aa9",
+    "resource": "plant_ball",
+    "file": "plant_ball.webp",
+    "density": "xxhdpi"
+  },
+  "plantBallXmas": {
+    "field": "K1",
+    "id": "0x7f080aaa",
+    "resource": "plant_ball_christmas",
+    "file": "plant_ball_christmas.webp",
+    "density": "xxhdpi"
+  },
+  "groundPieceXmas": {
+    "field": "A0",
+    "id": "0x7f080903",
+    "resource": "ground_piece_xmas",
+    "file": "ground_piece_xmas.webp",
+    "density": "xxhdpi"
+  },
+  "walkthrough1": {
+    "field": "Q4",
+    "id": "0x7f0811ef",
+    "resource": "walkthrough_1",
+    "file": "walkthrough_1.webp",
+    "density": "xxhdpi"
+  },
+  "walkthrough2": {
+    "field": "R4",
+    "id": "0x7f0811f0",
+    "resource": "walkthrough_2",
+    "file": "walkthrough_2.webp",
+    "density": "xxhdpi"
+  },
+  "walkthrough3": {
+    "field": "S4",
+    "id": "0x7f0811f1",
+    "resource": "walkthrough_3",
+    "file": "walkthrough_3.webp",
+    "density": "xxhdpi"
+  },
+  "walkthroughBg1": {
+    "field": null,
+    "id": "0x7f0811f2",
+    "resource": "walkthrough_bg_1",
+    "file": "walkthrough_bg_1.webp",
+    "density": "xxhdpi"
+  },
+  "walkthroughBgAll": {
+    "field": null,
+    "id": "0x7f0811f3",
+    "resource": "walkthrough_bg_all",
+    "file": "walkthrough_bg_all.webp",
+    "density": "xxhdpi"
+  },
+  "walkthroughPrivacy": {
+    "field": null,
+    "id": "0x7f08016c",
+    "resource": "dialog_walkthrough_privacy",
+    "file": "dialog_walkthrough_privacy.webp",
+    "density": "xxhdpi"
+  },
+  "tutorialForest": {
+    "field": "F4",
+    "id": "0x7f0811cd",
+    "resource": "tutorial_forest",
+    "file": "tutorial_forest.webp",
+    "density": "mdpi"
+  },
+  "tutorialSocial": {
+    "field": "G4",
+    "id": "0x7f0811ce",
+    "resource": "tutorial_social",
+    "file": "tutorial_social.webp",
+    "density": "mdpi"
+  },
+  "tutorialSoil": {
+    "field": "H4",
+    "id": "0x7f0811cf",
+    "resource": "tutorial_soil",
+    "file": "tutorial_soil.webp",
+    "density": "mdpi"
+  },
+  "tutorialStudying": {
+    "field": "I4",
+    "id": "0x7f0811d0",
+    "resource": "tutorial_studying",
+    "file": "tutorial_studying.webp",
+    "density": "mdpi"
+  },
+  "tutorialWorking": {
+    "field": "M4",
+    "id": "0x7f0811d4",
+    "resource": "tutorial_working",
+    "file": "tutorial_working.webp",
+    "density": "mdpi"
+  },
+  "tutorialTree0": {
+    "field": "J4",
+    "id": "0x7f0811d1",
+    "resource": "tutorial_tree_0",
+    "file": "tutorial_tree_0.webp",
+    "density": "mdpi"
+  },
+  "tutorialTree1": {
+    "field": "K4",
+    "id": "0x7f0811d2",
+    "resource": "tutorial_tree_1",
+    "file": "tutorial_tree_1.webp",
+    "density": "mdpi"
+  },
+  "tutorialTree2": {
+    "field": "L4",
+    "id": "0x7f0811d3",
+    "resource": "tutorial_tree_2",
+    "file": "tutorial_tree_2.webp",
+    "density": "mdpi"
+  },
+  "newLabel": {
+    "field": null,
+    "id": "0x7f080a8d",
+    "resource": "new_label_background",
+    "file": "new_label_background.svg",
+    "density": "base"
+  },
+  "pageBackground": {
+    "field": null,
+    "id": "0x7f080aa6",
+    "resource": "page_background",
+    "file": "page_background.svg",
+    "density": "base"
+  },
+  "hazeNoise": {
+    "field": null,
+    "id": "0x7f080906",
+    "resource": "haze_noise",
+    "file": "haze_noise.webp",
+    "density": "nodpi"
+  },
+  "fakeBackground": {
+    "field": null,
+    "id": "0x7f0801ce",
+    "resource": "fake_background",
+    "file": "fake_background.webp",
+    "density": "xxhdpi"
+  },
+  "emptyForest": {
+    "field": "f36434c0",
+    "id": "0x7f080170",
+    "resource": "empty_forest_placeholder",
+    "file": "empty_forest_placeholder.webp",
+    "density": "xxhdpi"
+  },
+  "failureReasonBtn": {
+    "field": null,
+    "id": "0x7f0801c8",
+    "resource": "failure_reason_btn",
+    "file": "failure_reason_btn.webp",
+    "density": "mdpi"
+  }
+}

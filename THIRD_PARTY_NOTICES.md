@@ -24,14 +24,21 @@ Apache-2.0). See `package-lock.json` and each package's LICENSE file for details
 
 ## Fonts
 
-The design system references **Source Sans Pro / Source Sans 3**, which is licensed under the
-SIL Open Font License 1.1. This repository does not bundle font binaries; the UI falls back to
-system fonts when the family is not installed. If you add the font, keep the OFL license text
-with it.
+The design system uses **Source Sans Pro** (4 weights: regular, semibold, bold, black) and
+**Roboto Medium Numbers** for clock numerals. Both are bundled in `public/fonts/`:
+
+- Source Sans Pro — Copyright 2010-2020 Adobe, licensed under the SIL Open Font License 1.1
+  (full text in `public/fonts/OFL.txt`).
+- Roboto — Copyright Google, licensed under the Apache License 2.0.
 
 ## Artwork and audio
 
-All tree artwork, icons, UI art and audio files shipped at runtime are generated locally by
-`scripts/extract-assets.mjs` as original SVG and synthesized WAV content. No third-party or
-copyrighted game assets are included. Generated assets live in `public/assets/**`, which is
-gitignored by default.
+All tree artwork, icons, UI art and audio files shipped in the default (placeholder) runtime are
+generated locally by `scripts/extract-assets.mjs` as original SVG and synthesized WAV content. No
+third-party or copyrighted game assets are included. Generated assets live in `public/assets/**`,
+which is gitignored by default.
+
+The optional `ASSET_MODE=original` development mode copies decoded artwork from a private local
+workspace into `public/assets-original/**`. That directory is gitignored, is never part of a public
+build (guarded by `verify-assets --mode=release` and `vite.config.ts`), and must not be
+redistributed.
