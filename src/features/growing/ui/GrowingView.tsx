@@ -5,6 +5,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Button } from '../../../core/designsystem/components/Button';
 import { ConfirmDialog, Dialog } from '../../../core/designsystem/components/Dialog';
 import { MainTopBar } from '../../../core/designsystem/components/MainTopBar';
+import { AnimatedTree } from '../../../core/designsystem/components/AnimatedTree';
 import { Icon } from '../../../core/designsystem/icons/Icon';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
 import { useSessionStore } from '../../../core/session/sessionStore';
@@ -30,17 +31,31 @@ function GrowingBall({ treeType, phase, progress }: { treeType: number; phase: n
         className="pointer-events-none absolute inset-0 h-full w-full object-contain"
       />
       <AnimatePresence mode="popLayout">
-        <motion.img
+        <motion.div
           key={phase}
-          src={repos.treeAssets.phaseUrl(treeType, phase)}
-          alt=""
           initial={{ opacity: 0, scale: 1 }}
           animate={{ opacity: 1, scale: [...MOTION.treeCrossFade.scale] }}
           exit={{ opacity: 0 }}
           transition={{ duration: MOTION.treeCrossFade.duration / 1000 }}
           className="pointer-events-none absolute left-1/2 h-auto w-[62%] -translate-x-1/2"
           style={{ bottom: '22%', willChange: 'transform, opacity' }}
-        />
+        >
+          <AnimatedTree
+            gid={treeType}
+            phase={phase}
+            className="h-auto w-full"
+            onError={(e) => {
+              const img = e.currentTarget;
+              const fallback = repos.treeAssets.fallbackUrl(treeType, `phase_${phase + 1}`);
+              if (fallback && !img.dataset.fallback) {
+                img.dataset.fallback = '1';
+                img.src = fallback;
+              } else {
+                img.src = repos.treeAssets.placeholderUrl();
+              }
+            }}
+          />
+        </motion.div>
       </AnimatePresence>
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full">
         <circle cx="50" cy="50" r={r} fill="none" stroke="var(--plantball-border)" strokeWidth={7} />

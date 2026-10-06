@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PlantBall } from './PlantBall';
 import { SpeciesPicker } from './SpeciesPicker';
@@ -17,7 +17,10 @@ import { config } from '../../../core/config';
 import { useSessionStore } from '../../../core/session/sessionStore';
 import { getSessionEngine } from '../../../core/session/SessionEngine';
 import { useTags, useTodayFocusMinutes, useTreeTypes, useWallet } from '../application/hooks';
+import { MOTION, transitionFor } from '../../../core/designsystem/motion';
 import type { CountMode, FocusMode } from '../../../data/types';
+
+const TUTORIAL_SECONDS = 12;
 
 export function PlantView({ onMenu }: { onMenu: () => void }) {
   const { t } = useTranslation();
@@ -52,6 +55,8 @@ export function PlantView({ onMenu }: { onMenu: () => void }) {
   const [modeOpen, setModeOpen] = useState(false);
   const [limitOpen, setLimitOpen] = useState(false);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [tutorialLeft, setTutorialLeft] = useState(TUTORIAL_SECONDS);
+  const [leaving, setLeaving] = useState(false);
 
   const maxMinutes = threeHours ? 180 : 120;
   const activeTag = tags.find((tag) => tag.id === tagId) ?? null;
@@ -65,30 +70,54 @@ export function PlantView({ onMenu }: { onMenu: () => void }) {
     }
   }, [tutorialFinished, plantCount, treeTypes.length]);
 
-  useEffect(() => {
-    if (!tutorialOpen) return;
-    const timer = window.setTimeout(() => {
-      setTutorialOpen(false);
-      setTutorialFinished(true);
-    }, 12_000);
-    return () => window.clearTimeout(timer);
-  }, [tutorialOpen, setTutorialFinished]);
-
-  const startPlant = () => {
+  const startPlant = (auto = false) => {
     const limitReached = !premium && todayMinutes + plantTimeMinutes > config.dailyFocusLimitFree;
     if (limitReached) {
       setLimitOpen(true);
+      setTutorialOpen(false);
       return;
     }
-    void getSessionEngine().start({
-      countMode,
-      focusMode,
-      plantMode: 'SINGLE',
-      plantTimeSeconds: plantTimeMinutes * 60,
-      tagId,
-      speciesId: selectedSpeciesId,
-    });
+    if (!auto && tutorialOpen) {
+      setTutorialOpen(false);
+      setTutorialFinished(true);
+    }
+    setLeaving(true);
+    window.setTimeout(() => {
+      void getSessionEngine().start({
+        countMode,
+        focusMode,
+        plantMode: 'SINGLE',
+        plantTimeSeconds: plantTimeMinutes * 60,
+        tagId,
+        speciesId: selectedSpeciesId,
+      });
+    }, MOTION.buttonFall.duration);
   };
+
+  useEffect(() => {
+    if (!tutorialOpen) return;
+    setTutorialLeft(TUTORIAL_SECONDS);
+    const interval = window.setInterval(() => {
+      setTutorialLeft((left) => {
+        const next = left - 1;
+        if (next <= 0) {
+          window.clearInterval(interval);
+          setTutorialFinished(true);
+          setTutorialOpen(false);
+          startPlant(true);
+        }
+        return next;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tutorialOpen]);
+
+  const tutorialStep =
+    tutorialLeft > 9 ? 0 : tutorialLeft > 6 ? 1 : tutorialLeft > 3 ? 2 : 3;
+  const tutorialText = [t('onboarding.tooltip1'), t('onboarding.tooltip2'), t('onboarding.tooltip3'), t('onboarding.tooltip4')][
+    tutorialStep
+  ];
 
   return (
     <div className="relative flex h-full flex-col" style={{ background: 'var(--brand)' }}>
@@ -125,36 +154,46 @@ export function PlantView({ onMenu }: { onMenu: () => void }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-3 px-6 pb-2">
-        <TagChip
-          name={activeTag?.tag ?? t('plant.tagUnset')}
-          color={tagColor}
-          editable
-          light
-          onClick={() => setTagOpen(true)}
-        />
-        <p className="text-numbers text-[36px] leading-none text-white" aria-live="polite">
-          {plantTimeMinutes}:00
-        </p>
-        <Button size="default" onClick={startPlant} data-testid="plant-button">
-          {t('plant.button')}
-        </Button>
-      </div>
-
-      <footer className="safe-bottom px-6 pb-4 pt-2">
-        <div className="flex items-center gap-2">
-          <ProgressRing size={28} strokeWidth={3} progress={Math.min(1, todayMinutes / config.dailyFocusLimitFree)}>
-            <span className="text-[8px] font-bold text-white">
-              {Math.round((todayMinutes / config.dailyFocusLimitFree) * 100)}%
-            </span>
-          </ProgressRing>
-          <p className="flex-1 text-caption1 text-white/80">
-            {premium
-              ? 'Premium'
-              : t('plant.limitFooter', { used: todayMinutes, limit: config.dailyFocusLimitFree })}
+      <motion.div
+        className="flex flex-col"
+        animate={leaving ? { y: '100%', opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={leaving ? transitionFor('buttonFall') : { duration: 0.1 }}
+      >
+        <div className="flex flex-col items-center gap-3 px-6 pb-2">
+          <TagChip
+            name={activeTag?.tag ?? t('plant.tagUnset')}
+            color={tagColor}
+            editable
+            light
+            onClick={() => setTagOpen(true)}
+          />
+          <p className="text-numbers text-[36px] leading-none text-white" aria-live="polite">
+            {plantTimeMinutes}:00
           </p>
+          <Button size="default" onClick={() => startPlant()} data-testid="plant-button">
+            {t('plant.button')}
+          </Button>
         </div>
-      </footer>
+
+        <footer className="safe-bottom px-6 pb-4 pt-2">
+          <div className="flex items-center gap-2">
+            <ProgressRing
+              size={28}
+              strokeWidth={3}
+              progress={Math.min(1, todayMinutes / config.dailyFocusLimitFree)}
+            >
+              <span className="text-[8px] font-bold text-white">
+                {Math.round((todayMinutes / config.dailyFocusLimitFree) * 100)}%
+              </span>
+            </ProgressRing>
+            <p className="flex-1 text-caption1 text-white/80">
+              {premium
+                ? 'Premium'
+                : t('plant.limitFooter', { used: todayMinutes, limit: config.dailyFocusLimitFree })}
+            </p>
+          </div>
+        </footer>
+      </motion.div>
 
       <SpeciesPicker
         open={speciesOpen}
@@ -181,9 +220,7 @@ export function PlantView({ onMenu }: { onMenu: () => void }) {
         open={limitOpen}
         onClose={() => setLimitOpen(false)}
         title={t('plant.limitReached')}
-        actions={
-          <Button onClick={() => setLimitOpen(false)}>{t('common.ok')}</Button>
-        }
+        actions={<Button onClick={() => setLimitOpen(false)}>{t('common.ok')}</Button>}
       >
         <p>
           {t('plant.limitFooter', { used: todayMinutes, limit: config.dailyFocusLimitFree })}. You can
@@ -191,30 +228,38 @@ export function PlantView({ onMenu }: { onMenu: () => void }) {
         </p>
       </Dialog>
 
-      {tutorialOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 z-40 flex flex-col items-center justify-end pb-28"
-          style={{ background: 'rgba(0,0,0,0.35)' }}
-          onClick={() => {
-            setTutorialOpen(false);
-            setTutorialFinished(true);
-          }}
-        >
+      {/* First-plant tutorial: 12s countdown, tooltips at 12/9/6/3, coach mark. */}
+      <AnimatePresence>
+        {tutorialOpen && (
           <motion.div
-            initial={{ y: 12, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="mx-8 rounded-[var(--radius-l)] bg-white p-4 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: MOTION.firstPlantFadeIn.duration / 1000 }}
+            className="absolute inset-0 z-40"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+            onClick={() => {
+              setTutorialOpen(false);
+              setTutorialFinished(true);
+            }}
           >
-            <p className="text-headline5">{t('onboarding.tutorialTitle')}</p>
-            <p className="mt-1 text-body2 text-[var(--text-secondary)]">{t('onboarding.tutorialText')}</p>
-            <p className="mt-2 text-caption1 text-[var(--text-tertiary)]">
-              {t('onboarding.notNow')} · 12s
-            </p>
+            <div className="absolute bottom-[34px] left-1/2 h-[54px] w-[132px] -translate-x-1/2 rounded-full border-2 border-white/90" />
+            <motion.div
+              key={tutorialStep}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={transitionFor('hintEnter')}
+              className="absolute bottom-[150px] left-1/2 mx-6 w-[300px] -translate-x-1/2 rounded-[var(--radius-l)] bg-white p-4 text-center"
+              style={{ transformOrigin: '50% 100%' }}
+            >
+              <p className="text-headline5">{tutorialText}</p>
+              <p className="mt-1 text-caption1 text-[var(--text-tertiary)]">
+                {t('onboarding.notNow')} · {tutorialLeft}s
+              </p>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { getAudio } from '../../../core/audio/AudioManager';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
 import { plantBallUrl } from '../../../core/designsystem/assets';
+import { AnimatedTree } from '../../../core/designsystem/components/AnimatedTree';
 import { MOTION, anticipateOvershoot } from '../../../core/designsystem/motion';
 import { PLANT_MINUTE_STEPS } from '../domain/constants';
 
@@ -62,7 +63,6 @@ export function PlantBall({
   const angle = START_ANGLE + SWEEP * Math.min(1, Math.max(0, progress));
   const arc = useMemo(() => arcPath(angle), [angle]);
   const thumb = pointAt(angle);
-  const treeUrl = repos.treeAssets.phaseUrl(speciesId, 5);
 
   const minutesFromEvent = useCallback(
     (clientX: number, clientY: number) => {
@@ -141,11 +141,9 @@ export function PlantBall({
         animate={{ x: '-50%', scaleX: 1, scaleY: 1 }}
         transition={{ duration: MOTION.treeIconPop.duration / 1000, ease: anticipateOvershoot }}
       >
-        <img
-          src={treeUrl}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
+        <AnimatedTree
+          gid={speciesId}
+          phase={5}
           className="h-auto w-full"
           onError={(e) => {
             const img = e.currentTarget;

@@ -15,6 +15,7 @@ import { UDKeys } from '../../../core/prefs/UDKeys';
 import { dayKey, formatMinutes } from '../../../core/lib/format';
 import { getAudio } from '../../../core/audio/AudioManager';
 import { toast } from '../../../core/designsystem/components/Snackbar';
+import { EASING, MOTION, transitionFor } from '../../../core/designsystem/motion';
 
 function useCountUp(target: number, duration = 600): number {
   const [value, setValue] = useState(0);
@@ -43,9 +44,16 @@ export function ResultView() {
   const [reasonOpen, setReasonOpen] = useState(false);
   const [note, setNote] = useState(result?.plant.note ?? '');
   const [boostDate, setBoostDate] = usePref<string>(UDKeys.BOOST_USED_DATE, '');
+  const [leaving, setLeaving] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const displayedCoins = useCountUp(result?.coins ?? 0);
+
+  /** bot3btn_fall: the three result actions drop away before returning. */
+  const done = () => {
+    setLeaving(true);
+    window.setTimeout(resetForm, MOTION.bot3btnFall.duration + MOTION.bot3btnFall.stagger * 2);
+  };
 
   useEffect(() => {
     if (!result) return;
@@ -100,10 +108,10 @@ export function ResultView() {
     <div className="relative flex h-full flex-col" style={{ background: 'var(--brand)' }}>
       <MainTopBar
         leading="back"
-        onLeading={resetForm}
+        onLeading={done}
         countMode={plant.mode === 'countup' ? 'UP' : 'DOWN'}
         focusMode={focusMode}
-        onModeClick={resetForm}
+        onModeClick={done}
         coin={wallet.coin}
         onAddCoin={() => undefined}
       />
@@ -155,7 +163,16 @@ export function ResultView() {
           )}
         </div>
 
-        <div className="mt-10 flex items-center justify-center" style={{ gap: 'var(--result-action-gap)' }}>
+        <motion.div
+          className="mt-10 flex items-center justify-center"
+          style={{ gap: 'var(--result-action-gap)' }}
+          animate={leaving ? { y: '100%', opacity: 0 } : { y: 0, opacity: 1 }}
+          transition={
+            leaving
+              ? { duration: MOTION.bot3btnFall.duration / 1000, ease: EASING.anticipate }
+              : { duration: 0.2 }
+          }
+        >
           <button
             onClick={() => setNoteOpen(true)}
             aria-label={t('result.note')}
@@ -177,9 +194,22 @@ export function ResultView() {
           >
             <Icon name="share" size={40} />
           </button>
-        </div>
+        </motion.div>
 
-        <div className="mt-8 flex justify-center">
+        <motion.div
+          className="mt-8 flex justify-center"
+          initial={{ y: '40%', opacity: 0 }}
+          animate={leaving ? { y: '100%', opacity: 0 } : { y: 0, opacity: 1 }}
+          transition={
+            leaving
+              ? {
+                  duration: MOTION.bot3btnFall.duration / 1000,
+                  ease: EASING.anticipate,
+                  delay: MOTION.bot3btnFall.stagger / 1000,
+                }
+              : transitionFor('grownBtnPop')
+          }
+        >
           <Button
             size="big"
             style={{ width: 'var(--result-relax-width)', height: 'var(--result-relax-height)' }}
@@ -187,7 +217,7 @@ export function ResultView() {
           >
             {t('result.relax')}
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       <Dialog
