@@ -15,6 +15,7 @@ import { UDKeys } from '../../../core/prefs/UDKeys';
 import { dayKey, formatMinutes } from '../../../core/lib/format';
 import { getAudio } from '../../../core/audio/AudioManager';
 import { toast } from '../../../core/designsystem/components/Snackbar';
+import { Confetti, Lottie } from '../../../core/designsystem/components/Lottie';
 import { EASING, MOTION, transitionFor } from '../../../core/designsystem/motion';
 
 function useCountUp(target: number, duration = 600): number {
@@ -152,6 +153,16 @@ export function ResultView() {
             {t('result.focusTime')}: {formatMinutes(elapsedMs / 1000)}
             {gems > 0 ? ` · +${gems} ♦` : ''}
           </p>
+
+          {success && (
+            <div className="pointer-events-none relative mx-auto -mt-2 h-[90px] w-[200px]">
+              <Lottie
+                name="rainbow_bridge"
+                className="h-full w-full"
+                fallback={<Confetti className="h-full w-full" />}
+              />
+            </div>
+          )}
 
           {!success && (
             <button

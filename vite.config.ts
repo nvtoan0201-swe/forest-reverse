@@ -78,7 +78,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router', 'zustand'],
           data: ['dexie', 'dexie-react-hooks'],
-          fx: ['framer-motion', 'howler', 'html-to-image'],
+          fx: ['framer-motion', 'howler', 'html-to-image', 'lottie-web'],
         },
       },
     },

@@ -3,7 +3,9 @@ import { Drawer } from '../../menu/ui/Drawer';
 import { PlantView } from '../../plant/ui/PlantView';
 import { GrowingView } from '../../growing/ui/GrowingView';
 import { ResultView } from '../../result/ui/ResultView';
+import { Snow } from '../../../core/designsystem/components/Snow';
 import { useSessionStore } from '../../../core/session/sessionStore';
+import { usePref } from '../../../core/prefs/usePref';
 import { prefs } from '../../../core/prefs/prefs';
 import { UDKeys } from '../../../core/prefs/UDKeys';
 
@@ -15,6 +17,7 @@ export function MainPage() {
   const plantTimeMinutes = useSessionStore((s) => s.plantTimeMinutes);
   const tagId = useSessionStore((s) => s.tagId);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [xmas] = usePref<boolean>(UDKeys.XMAS_THEME, false);
 
   useEffect(() => {
     prefs.set(UDKeys.PREVIOUS_COUNT_MODE, countMode);
@@ -41,6 +44,7 @@ export function MainPage() {
       {mainState === 'plant' && <PlantView onMenu={() => setDrawerOpen(true)} />}
       {mainState === 'growing' && <GrowingView onMenu={() => setDrawerOpen(true)} />}
       {mainState === 'result' && <ResultView />}
+      <Snow enabled={xmas && mainState !== 'result'} />
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );

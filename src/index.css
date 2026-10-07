@@ -111,6 +111,26 @@
   background: var(--gray-300);
 }
 
+/* Placeholder celebration (original mode uses Lottie rainbow_bridge). */
+.confetti-particle {
+  position: absolute;
+  top: -8px;
+  width: 6px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall 1.6s linear infinite;
+}
+@keyframes confetti-fall {
+  from {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(140px) rotate(240deg);
+    opacity: 0;
+  }
+}
+
 .scroll-area {
   overflow-y: auto;
   scrollbar-width: thin;

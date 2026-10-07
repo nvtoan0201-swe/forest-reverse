@@ -29,6 +29,7 @@
     "howler": "^2.2.4",
     "html-to-image": "^1.11.13",
     "i18next": "^24.2.2",
+    "lottie-web": "^5.13.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.4.1",
