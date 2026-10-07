@@ -1,8 +1,7 @@
-import { useEffect, useState, type CSSProperties, type SyntheticEvent } from 'react';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
-import { Button } from '../../../core/designsystem/components/Button';
 import { Icon } from '../../../core/designsystem/icons/Icon';
 import { Dialog } from '../../../core/designsystem/components/Dialog';
 import { usePref } from '../../../core/prefs/usePref';
@@ -79,6 +78,7 @@ export function OnboardingPage() {
   const [, setFinished] = usePref<boolean>(UDKeys.WALKTHROUGH_FINISHED, false);
   const [step, setStep] = useState<'landing' | number>('landing');
   const [legalOpen, setLegalOpen] = useState(false);
+  const dragStartY = useRef<number | null>(null);
 
   const finish = () => {
     setFinished(true);
@@ -107,15 +107,15 @@ export function OnboardingPage() {
           <div className="mt-8 space-y-3">
             <button
               onClick={() => setStep(0)}
-              className="fg-button h-14 w-full rounded-[8px] text-button1"
-              style={{ '--fg-bg': '#165943', '--fg-shadow-color': '#0c3c2e' } as CSSProperties}
+              className="h-14 w-full rounded-[8px] text-button2 font-bold text-white"
+              style={{ background: 'var(--walkthrough-button)' }}
             >
               {t('onboarding.start')}
             </button>
             <button
               onClick={() => setStep(0)}
               className="h-14 w-full rounded-[8px] text-button2 font-bold"
-              style={{ background: 'var(--forest-teal-100)', color: 'var(--forest-teal-600)' }}
+              style={{ background: 'var(--walkthrough-mint)', color: 'var(--walkthrough-button)' }}
             >
               {t('onboarding.already')}
             </button>
@@ -152,6 +152,15 @@ export function OnboardingPage() {
   const next = () => (step >= pages.length - 1 ? finish() : setStep(step + 1));
   const dark = isOriginalMode && step >= 3;
   const last = step >= pages.length - 1;
+  const buttonLabels = [
+    null,
+    t('onboarding.walkButton2'),
+    t('onboarding.walkButton3'),
+    t('onboarding.walkButton4'),
+    t('onboarding.walkButton5'),
+    t('onboarding.finish'),
+  ] as const;
+  const buttonLabel = buttonLabels[step];
 
   return (
     <div
@@ -197,10 +206,10 @@ export function OnboardingPage() {
                 height: 6,
                 background:
                   i === step
-                    ? 'var(--forest-teal-600)'
+                    ? 'var(--walkthrough-active)'
                     : dark
                       ? 'rgba(255,255,255,0.4)'
-                      : 'var(--gray-300)',
+                      : 'var(--walkthrough-inactive)',
               }}
             />
           ))}
@@ -214,6 +223,13 @@ export function OnboardingPage() {
         dragElastic={0.4}
         onDragEnd={(_, info) => {
           if (info.offset.y > 80) next();
+        }}
+        onPointerDown={(e) => {
+          dragStartY.current = e.clientY;
+        }}
+        onPointerUp={(e) => {
+          if (dragStartY.current !== null && e.clientY - dragStartY.current > 80) next();
+          dragStartY.current = null;
         }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -229,7 +245,13 @@ export function OnboardingPage() {
         >
           {page.title}
         </h2>
-        {!isOriginalMode && <p className="mt-2 text-body1 text-[var(--text-secondary)]">{page.text}</p>}
+        {page.text && <p className="mt-2 text-body1 text-[var(--text-secondary)]">{page.text}</p>}
+        {last && (
+          <ul className="mt-4 space-y-1 text-caption1 text-[var(--forest-teal-600)]">
+            <li>✓ {t('onboarding.walkFeature1')}</li>
+            <li>✓ {t('onboarding.walkFeature2')}</li>
+          </ul>
+        )}
         {isOriginalMode ? (
           <img
             src={uiUrl(WALKTHROUGH_ART[step] ?? 'walkthrough_3.webp')}
@@ -245,23 +267,29 @@ export function OnboardingPage() {
         )}
       </motion.div>
 
-      {(!isOriginalMode || last) && (
+      {buttonLabel && (
         <div className="relative z-10 flex flex-col items-center px-6 pb-6" style={{ gap: 12 }}>
-          {isOriginalMode && (
-            <p className="text-body2 font-bold text-[var(--forest-teal-600)]">{t('onboarding.swipeDown')}</p>
+          {isOriginalMode && step === 0 && (
+            <p className="text-body2 font-bold" style={{ color: 'var(--walkthrough-button)' }}>
+              {t('onboarding.swipeDown')}
+            </p>
           )}
-          <Button variant="accentTeal" long full onClick={next}>
-            {last ? t('onboarding.finish') : t('onboarding.continue')}
-          </Button>
+          <button
+            onClick={next}
+            className="h-[50px] w-full rounded-[12px] text-subtitle1 text-white"
+            style={{ background: 'var(--walkthrough-button)' }}
+          >
+            {buttonLabel}
+          </button>
         </div>
       )}
 
-      {isOriginalMode && !last && (
+      {isOriginalMode && !last && buttonLabel === null && (
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex items-end justify-center pb-16"
           style={{
             height: '22%',
-            background: 'linear-gradient(180deg, rgba(165,227,208,0) 0%, rgba(165,227,208,0.9) 80%)',
+            background: 'var(--gradient-walkthrough-footer)',
           }}
         >
           <span className="text-body2 text-white">{t('onboarding.swipeDown')}</span>

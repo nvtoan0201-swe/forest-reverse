@@ -252,6 +252,17 @@
   --gradient-splash: linear-gradient(180deg, #67d0ac, #51a387);
   --gradient-subscription: linear-gradient(135deg, #81d200 7%, #0ebc73 50%, #08c1f3 88%);
   --gradient-subscription-shadow: linear-gradient(135deg, #55a507 6%, #179a4b 50%, #0085a4 94%);
+  /* Sampled from the original walkthrough capture (1080x2340). */
+  --gradient-walkthrough-footer: linear-gradient(
+    180deg,
+    rgb(201 245 230 / 0) 0%,
+    #c9f5e6 62%,
+    #88e9c8 100%
+  );
+  --walkthrough-active: #035462;
+  --walkthrough-inactive: #cddde0;
+  --walkthrough-button: #035462;
+  --walkthrough-mint: #b3ecd9;
 
   /* Radius / border / spacing */
   --radius-xs: 2px;

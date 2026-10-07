@@ -14,11 +14,22 @@ test.describe('onboarding', () => {
     await page.goto('/');
     await expect(page.getByText('Plant your Grove,')).toBeVisible({ timeout: 10_000 });
     await page.getByRole('button', { name: 'Start Journey' }).click();
+    const heading = page.getByRole('heading', { name: /Welcome To Forest/ });
+    await expect(heading).toBeVisible();
 
-    for (let i = 0; i < 5; i++) {
-      await page.getByRole('button', { name: 'Continue' }).click();
+    // Page 1 advances by dragging the seedling down.
+    const box = await heading.boundingBox();
+    const startX = box ? box.x + box.width / 2 : 195;
+    const startY = box ? box.y + 20 : 200;
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX, startY + 320, { steps: 8 });
+    await page.mouse.up();
+
+    for (const label of ['Continue', "I'll focus", 'Keep focusing', 'Grow Change']) {
+      await page.getByRole('button', { name: label }).click();
     }
-    await page.getByRole('button', { name: 'Start planting' }).click();
+    await page.getByRole('button', { name: 'Start Now' }).click();
     await expect(page.getByTestId('plant-button')).toBeVisible();
   });
 });
