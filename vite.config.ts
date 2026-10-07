@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { existsSync } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -23,9 +23,37 @@ function guardOriginalAssets() {
   };
 }
 
+/**
+ * Serve the bundled landing webview verbatim. Without this Vite dev tries to
+ * transform it as an HTML entry and crashes on its bundled imports.
+ */
+function serveOriginalLanding() {
+  return {
+    name: 'serve-original-landing',
+    apply: 'serve' as const,
+    configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url ?? '';
+        if (!url.startsWith('/assets-original/ui/landing.html')) return next();
+        const file = 'public/assets-original/ui/landing.html';
+        if (!existsSync(file)) return next();
+        const response = res as {
+          setHeader: (key: string, value: string) => void;
+          statusCode: number;
+        };
+        response.setHeader('Content-Type', 'text/html; charset=utf-8');
+        response.setHeader('Cache-Control', 'no-store');
+        response.statusCode = 200;
+        createReadStream(file).pipe(response as unknown as NodeJS.WritableStream);
+      });
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     guardOriginalAssets(),
+    serveOriginalLanding(),
     react(),
     tailwindcss(),
     VitePWA({

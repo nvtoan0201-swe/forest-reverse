@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { PageShell } from '../../../app/layout/PageShell';
 import { Button } from '../../../core/designsystem/components/Button';
@@ -8,7 +9,11 @@ import { ConfirmDialog } from '../../../core/designsystem/components/Dialog';
 import { Icon } from '../../../core/designsystem/icons/Icon';
 import { toast } from '../../../core/designsystem/components/Snackbar';
 import { useRepos } from '../../../app/providers/RepositoryProvider';
+import { useSessionStore } from '../../../core/session/sessionStore';
+import { usePref } from '../../../core/prefs/usePref';
+import { UDKeys } from '../../../core/prefs/UDKeys';
 import { getAudio } from '../../../core/audio/AudioManager';
+import { soundCoverFor } from '../../../core/designsystem/assets';
 import { useUnlockedSounds, useUnlockedTrees, useWallet } from '../../plant/application/hooks';
 import type { ProductRow } from '../../../data/types';
 
@@ -19,6 +24,9 @@ const NO_PRODUCTS: never[] = [];
 export function StorePage() {
   const { t } = useTranslation();
   const repos = useRepos();
+  const navigate = useNavigate();
+  const selectSpecies = useSessionStore((s) => s.selectSpecies);
+  const [, setSelectedSound] = usePref<number>(UDKeys.SELECTED_BG_MUSIC, 0);
   const wallet = useWallet();
   const unlockedTrees = useUnlockedTrees();
   const unlockedSounds = useUnlockedSounds();
@@ -76,7 +84,15 @@ export function StorePage() {
       {items.map((product) => {
         const unlocked = unlockedTrees.includes(product.productableGid);
         return (
-          <li key={product.id} className="forest-card flex flex-col items-center gap-1 p-2">
+          <li key={product.id} className="forest-card relative flex flex-col items-center gap-1 p-2">
+            {product.isPinned && !unlocked && (
+              <span
+                className="absolute left-1 top-1 rounded-[3px] px-1 text-[9px] font-bold"
+                style={{ background: 'var(--yellow-100)', color: 'var(--text-brown)' }}
+              >
+                {t('store.new')}
+              </span>
+            )}
             <img
               src={repos.treeAssets.productUrl(product.productableGid)}
               alt=""
@@ -85,7 +101,15 @@ export function StorePage() {
             />
             <p className="line-clamp-1 text-caption1">{product.title}</p>
             {unlocked ? (
-              <span className="text-caption2 text-[var(--success)]">{t('store.unlocked')}</span>
+              <button
+                onClick={() => {
+                  selectSpecies(product.productableGid);
+                  navigate('/main');
+                }}
+                className="text-caption2 font-bold text-[var(--brand-variant)]"
+              >
+                {t('store.use')}
+              </button>
             ) : (
               <Button
                 size="chip"
@@ -129,14 +153,19 @@ export function StorePage() {
               const sound = sounds.find((s) => s.gid === product.productableGid);
               const unlocked = unlockedSounds.includes(product.productableGid);
               const playing = previewGid === product.productableGid;
+              const cover = soundCoverFor(product.productableGid);
               return (
                 <li key={product.id} className="forest-card flex items-center gap-3 p-3">
-                  <span
-                    className="flex h-10 w-10 items-center justify-center rounded-full"
-                    style={{ background: 'var(--forest-teal-100)' }}
-                  >
-                    <Icon name="sound" size={18} className="text-[var(--brand-variant)]" />
-                  </span>
+                  {cover ? (
+                    <img src={cover} alt="" className="h-12 w-12 rounded-[var(--radius-m)] object-cover" />
+                  ) : (
+                    <span
+                      className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-m)]"
+                      style={{ background: 'var(--forest-teal-100)' }}
+                    >
+                      <Icon name="sound" size={18} className="text-[var(--brand-variant)]" />
+                    </span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-subtitle2">{sound?.title ?? product.title}</p>
                     <button
@@ -147,7 +176,16 @@ export function StorePage() {
                     </button>
                   </div>
                   {unlocked ? (
-                    <span className="text-caption1 text-[var(--success)]">{t('store.unlocked')}</span>
+                    <button
+                      onClick={() => {
+                        setSelectedSound(product.productableGid);
+                        getAudio().playBgm(product.productableGid);
+                        navigate('/main');
+                      }}
+                      className="text-caption1 font-bold text-[var(--brand-variant)]"
+                    >
+                      {t('store.use')}
+                    </button>
                   ) : (
                     <Button
                       size="chip"
